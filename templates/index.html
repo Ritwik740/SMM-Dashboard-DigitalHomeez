@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Project Calendar Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <style>
+        .calendar-month {
+            margin-bottom: 2rem;
+            border: 1px solid #dee2e6;
+            border-radius: 0.25rem;
+            padding: 1rem;
+        }
+        .table th {
+            background-color: #f8f9fa;
+        }
+        .select2-container {
+            width: 100% !important;
+        }
+    </style>
+    <script>
+        // Prevent going back to dashboard after logout
+        window.onload = function() {
+            if (window.history && window.history.pushState) {
+                window.addEventListener('popstate', function(event) {
+                    window.location.href = '/login';
+                });
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Project Calendar Dashboard</h1>
+            <a href="{{ url_for('logout') }}" class="btn btn-outline-danger">Logout</a>
+        </div>
+        
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <label for="projectSelect" class="form-label">Select Project:</label>
+                <select id="projectSelect" class="form-select">
+                    <option value="">Select a project...</option>
+                    {% for project in projects %}
+                    <option value="{{ project }}">{{ project }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">&nbsp;</label>
+                <button class="btn btn-success d-block w-100" onclick="showNewProjectModal()">Add New Project</button>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">&nbsp;</label>
+                <button class="btn btn-primary d-block w-100" onclick="addNewEntry()">Add New Entry</button>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">&nbsp;</label>
+                <div class="btn-group w-100">
+                    <button class="btn btn-info" onclick="downloadCalendar()">Download</button>
+                    <button class="btn btn-danger" onclick="deleteProject()">Delete Project</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="calendarContainer"></div>
+    </div>
+
+    <!-- Modal for new project -->
+    <div class="modal fade" id="newProjectModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Create New Project</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="newProjectForm">
+                        <div class="mb-3">
+                            <label for="projectName" class="form-label">Project Name</label>
+                            <input type="text" class="form-control" id="projectName" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="createProject()">Create Project</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for adding/editing entries -->
+    <div class="modal fade" id="entryModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalTitle">Add/Edit Entry</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="entryForm">
+                        <input type="hidden" id="entryIndex">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Date</label>
+                                <input type="date" class="form-control" id="entryDate" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Day</label>
+                                <input type="text" class="form-control" id="entryDay" readonly>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label">Content Type</label>
+                                <select class="form-select" id="contentType" required>
+                                    <option value="NA">NA</option>
+                                    <option value="post">Post</option>
+                                    <option value="ad">Ad</option>
+                                    <option value="reel">Reel</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Channel</label>
+                                <select class="form-select" id="channel" required>
+                                    <option value="NA">NA</option>
+                                    <option value="facebook">Facebook</option>
+                                    <option value="instagram">Instagram</option>
+                                    <option value="linkedin">LinkedIn</option>
+                                    <option value="whatsapp">WhatsApp</option>
+                                    <option value="googleads">Google Ads</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Status</label>
+                                <select class="form-select" id="status" required>
+                                    <option value="NA">NA</option>
+                                    <option value="completed">Completed</option>
+                                    <option value="pending">Pending</option>
+                                    <option value="live">Live</option>
+                                    <option value="event">Event</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Text Content</label>
+                            <textarea class="form-control" id="textContent" rows="3"></textarea>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Approval</label>
+                                <select class="form-select" id="approval" required>
+                                    <option value="NA">NA</option>
+                                    <option value="approved">Approved</option>
+                                    <option value="disapproved">Disapproved</option>
+                                    <option value="pending">Pending</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">References</label>
+                                <input type="text" class="form-control" id="references">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="saveEntry()">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        let currentProject = '';
+        let entryModal;
+        let newProjectModal;
+        let currentEntries = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            entryModal = new bootstrap.Modal(document.getElementById('entryModal'));
+            newProjectModal = new bootstrap.Modal(document.getElementById('newProjectModal'));
+            
+            // Initialize Select2 with events
+            $('#projectSelect').select2().on('select2:select', function(e) {
+                currentProject = e.target.value;
+                if (currentProject) {
+                    loadCalendarData();
+                } else {
+                    document.getElementById('calendarContainer').innerHTML = '';
+                }
+            });
+
+            document.getElementById('entryDate').addEventListener('change', function() {
+                const date = new Date(this.value);
+                const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                document.getElementById('entryDay').value = days[date.getDay()];
+            });
+        });
+
+        function showNewProjectModal() {
+            document.getElementById('newProjectForm').reset();
+            newProjectModal.show();
+        }
+
+        function createProject() {
+            const form = document.getElementById('newProjectForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const projectName = document.getElementById('projectName').value.trim();
+            
+            fetch('/add_project', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    project_name: projectName
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update the project select dropdown
+                    const select = document.getElementById('projectSelect');
+                    select.innerHTML = '<option value="">Select a project...</option>' +
+                        data.projects.map(project => `<option value="${project}">${project}</option>`).join('');
+                    
+                    // Set the new project as selected
+                    $('#projectSelect').val(projectName).trigger('change');
+                    
+                    newProjectModal.hide();
+                } else {
+                    alert(data.error || 'Failed to create project');
+                }
+            });
+        }
+
+        function loadCalendarData() {
+            fetch(`/get_calendar_data/${currentProject}`)
+                .then(response => response.json())
+                .then(data => {
+                    currentEntries = data.calendar_entries;
+                    displayCalendar();
+                });
+        }
+
+        function displayCalendar() {
+            const container = document.getElementById('calendarContainer');
+            container.innerHTML = '';
+
+            // Group entries by month first
+            const entriesByMonth = {};
+            currentEntries.forEach(entry => {
+                const month = entry.date.substring(0, 7);
+                if (!entriesByMonth[month]) {
+                    entriesByMonth[month] = [];
+                }
+                entriesByMonth[month].push(entry);
+            });
+
+            // Create current month's table
+            const currentDate = new Date();
+            const currentMonth = currentDate.toISOString().substring(0, 7);
+            const monthName = currentDate.toLocaleString('default', { month: 'long', year: 'numeric' });
+
+            const monthDiv = document.createElement('div');
+            monthDiv.className = 'calendar-month';
+            monthDiv.innerHTML = `
+                <h3 class="mb-3">${monthName}</h3>
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Day</th>
+                                <th>Content Type</th>
+                                <th>Channel</th>
+                                <th>Status</th>
+                                <th>Text Content</th>
+                                <th>Approval</th>
+                                <th>References</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${!entriesByMonth[currentMonth] || entriesByMonth[currentMonth].length === 0 ? 
+                                '<tr><td colspan="9" class="text-center text-muted">No entries yet. Click "Add New Entry" to create one.</td></tr>' :
+                                entriesByMonth[currentMonth].map((entry, index) => `
+                                    <tr>
+                                        <td>${entry.date}</td>
+                                        <td>${entry.day}</td>
+                                        <td>${entry.content_type}</td>
+                                        <td>${entry.channel}</td>
+                                        <td>${entry.status}</td>
+                                        <td>${entry.text_content}</td>
+                                        <td>${entry.approval}</td>
+                                        <td>${entry.references}</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-primary" onclick="editEntry(${currentEntries.indexOf(entry)})">Edit</button>
+                                            <button class="btn btn-sm btn-danger" onclick="deleteEntry(${currentEntries.indexOf(entry)})">Delete</button>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            container.appendChild(monthDiv);
+
+            // Sort months in descending order and filter out current month
+            const sortedMonths = Object.keys(entriesByMonth)
+                .filter(month => month !== currentMonth)
+                .sort()
+                .reverse();
+
+            // Display other months
+            sortedMonths.forEach(month => {
+                const monthEntries = entriesByMonth[month];
+                const monthDiv = document.createElement('div');
+                monthDiv.className = 'calendar-month';
+                
+                const monthName = new Date(month + '-01').toLocaleString('default', { month: 'long', year: 'numeric' });
+                monthDiv.innerHTML = `
+                    <h3 class="mb-3">${monthName}</h3>
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Day</th>
+                                    <th>Content Type</th>
+                                    <th>Channel</th>
+                                    <th>Status</th>
+                                    <th>Text Content</th>
+                                    <th>Approval</th>
+                                    <th>References</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${monthEntries.map((entry, index) => `
+                                    <tr>
+                                        <td>${entry.date}</td>
+                                        <td>${entry.day}</td>
+                                        <td>${entry.content_type}</td>
+                                        <td>${entry.channel}</td>
+                                        <td>${entry.status}</td>
+                                        <td>${entry.text_content}</td>
+                                        <td>${entry.approval}</td>
+                                        <td>${entry.references}</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-primary" onclick="editEntry(${currentEntries.indexOf(entry)})">Edit</button>
+                                            <button class="btn btn-sm btn-danger" onclick="deleteEntry(${currentEntries.indexOf(entry)})">Delete</button>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+                container.appendChild(monthDiv);
+            });
+        }
+
+        function addNewEntry() {
+            const selectedProject = $('#projectSelect').val();
+            if (!selectedProject) {
+                alert('Please select a project first');
+                return;
+            }
+            currentProject = selectedProject; // Ensure currentProject is updated
+            document.getElementById('entryForm').reset();
+            document.getElementById('entryIndex').value = '';
+            document.getElementById('entryDate').value = new Date().toISOString().split('T')[0];
+            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            document.getElementById('entryDay').value = days[new Date().getDay()];
+            entryModal.show();
+        }
+
+        function editEntry(index) {
+            const entry = currentEntries[index];
+            document.getElementById('entryIndex').value = index;
+            document.getElementById('entryDate').value = entry.date;
+            document.getElementById('entryDay').value = entry.day;
+            document.getElementById('contentType').value = entry.content_type;
+            document.getElementById('channel').value = entry.channel;
+            document.getElementById('status').value = entry.status;
+            document.getElementById('textContent').value = entry.text_content;
+            document.getElementById('approval').value = entry.approval;
+            document.getElementById('references').value = entry.references;
+            entryModal.show();
+        }
+
+        function saveEntry() {
+            const form = document.getElementById('entryForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const index = document.getElementById('entryIndex').value;
+            const entry = {
+                project: currentProject,
+                date: document.getElementById('entryDate').value,
+                day: document.getElementById('entryDay').value,
+                content_type: document.getElementById('contentType').value,
+                channel: document.getElementById('channel').value,
+                status: document.getElementById('status').value,
+                text_content: document.getElementById('textContent').value,
+                approval: document.getElementById('approval').value,
+                references: document.getElementById('references').value
+            };
+
+            if (index === '') {
+                // Add new entry
+                fetch('/add_entry', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(entry)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        loadCalendarData();
+                        entryModal.hide();
+                    }
+                });
+            } else {
+                // Update existing entry
+                entry.index = parseInt(index);
+                fetch('/update_entry', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(entry)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        loadCalendarData();
+                        entryModal.hide();
+                    }
+                });
+            }
+        }
+
+        function deleteEntry(index) {
+            if (confirm('Are you sure you want to delete this entry?')) {
+                fetch('/delete_entry', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        project: currentProject,
+                        index: index
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        loadCalendarData();
+                    }
+                });
+            }
+        }
+
+        function deleteProject() {
+            const selectedProject = $('#projectSelect').val();
+            if (!selectedProject) {
+                alert('Please select a project first');
+                return;
+            }
+
+            if (!confirm(`Are you sure you want to delete the project "${selectedProject}"? This action cannot be undone.`)) {
+                return;
+            }
+
+            fetch('/delete_project', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    project_name: selectedProject
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update the project select dropdown
+                    const select = document.getElementById('projectSelect');
+                    select.innerHTML = '<option value="">Select a project...</option>' +
+                        data.projects.map(project => `<option value="${project}">${project}</option>`).join('');
+                    
+                    // Clear the current project and calendar display
+                    currentProject = '';
+                    $('#projectSelect').val('').trigger('change');
+                    document.getElementById('calendarContainer').innerHTML = '';
+                    
+                    alert('Project deleted successfully');
+                } else {
+                    alert(data.error || 'Failed to delete project');
+                }
+            });
+        }
+
+        function downloadCalendar() {
+            if (!currentProject || currentEntries.length === 0) {
+                alert('Please select a project with entries first');
+                return;
+            }
+
+            // Prepare CSV content
+            const headers = ['Date', 'Day', 'Content Type', 'Channel', 'Status', 'Text Content', 'Approval', 'References'];
+            let csvContent = headers.join(',') + '\n';
+
+            // Sort entries by date
+            const sortedEntries = [...currentEntries].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            // Add entries to CSV
+            sortedEntries.forEach(entry => {
+                const row = [
+                    entry.date,
+                    entry.day,
+                    entry.content_type,
+                    entry.channel,
+                    entry.status,
+                    `"${(entry.text_content || '').replace(/"/g, '""')}"`, // Handle quotes in text content
+                    entry.approval,
+                    `"${(entry.references || '').replace(/"/g, '""')}"` // Handle quotes in references
+                ];
+                csvContent += row.join(',') + '\n';
+            });
+
+            // Create and trigger download
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `${currentProject}_calendar_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html>

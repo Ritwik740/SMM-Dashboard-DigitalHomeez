@@ -1,0 +1,10 @@
+{
+    "projects": {
+        "Project 1": {
+            "calendar_entries": []
+        },
+        "Default project": {
+            "calendar_entries": []
+        }
+    }
+}
