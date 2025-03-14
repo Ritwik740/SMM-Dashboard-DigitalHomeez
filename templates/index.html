@@ -154,6 +154,16 @@
                         </div>
                         <div class="row mb-3">
                             <div class="col-md-6">
+                                <label class="form-label">Hashtags</label>
+                                <input type="text" class="form-control" id="hashtags">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Call to Action</label>
+                                <input type="text" class="form-control" id="callToAction">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
                                 <label class="form-label">Approval</label>
                                 <select class="form-select" id="approval" required>
                                     <option value="NA">NA</option>
@@ -249,106 +259,114 @@
         }
 
         function loadCalendarData() {
-            fetch(`/get_calendar_data/${currentProject}`)
+            if (!currentProject) return;
+            
+            fetch(`/get_calendar_data/${encodeURIComponent(currentProject)}`)
                 .then(response => response.json())
                 .then(data => {
                     currentEntries = data.calendar_entries || [];
                     displayCalendar(currentEntries);
-                })
-                .catch(error => {
-                    console.error('Error loading calendar data:', error);
-                    alert('Error loading calendar data');
                 });
         }
 
         function displayCalendar(entries) {
             const container = document.getElementById('calendarContainer');
             container.innerHTML = '';
-
-            if (!entries || entries.length === 0) {
-                container.innerHTML = `
-                    <div class="alert alert-info">
-                        <h4>No Content Calendar Available</h4>
-                        <p>This project currently has no content calendar entries. You can:</p>
-                        <ul>
-                            <li>Add new entries manually using the "Add New Entry" button</li>
-                            <li>Generate a content calendar by adding a new client with content requirements</li>
-                        </ul>
-                    </div>
-                `;
-                return;
-            }
-
+            
             // Group entries by month
-            const entriesByMonth = {};
+            const groupedEntries = {};
             entries.forEach(entry => {
-                if (entry.date) {
-                    const month = entry.date.substring(0, 7); // Get YYYY-MM
-                    if (!entriesByMonth[month]) {
-                        entriesByMonth[month] = [];
-                    }
-                    entriesByMonth[month].push(entry);
+                const date = new Date(entry.date);
+                const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                if (!groupedEntries[monthKey]) {
+                    groupedEntries[monthKey] = [];
                 }
+                groupedEntries[monthKey].push(entry);
             });
-
-            if (Object.keys(entriesByMonth).length === 0) {
-                container.innerHTML = `
-                    <div class="alert alert-warning">
-                        <h4>No Dated Entries Found</h4>
-                        <p>There are entries in the calendar, but none have dates assigned. Please add dates to your entries to view them in the calendar view.</p>
-                    </div>
-                `;
-                return;
-            }
-
-            // Display each month
-            Object.keys(entriesByMonth).sort().forEach(month => {
+            
+            // Create table for each month
+            Object.entries(groupedEntries).forEach(([monthKey, monthEntries]) => {
+                const [year, month] = monthKey.split('-');
+                const monthName = new Date(year, month - 1).toLocaleString('default', { month: 'long' });
+                
                 const monthDiv = document.createElement('div');
                 monthDiv.className = 'calendar-month';
-                
-                const monthHeader = document.createElement('h3');
-                monthHeader.textContent = new Date(month + '-01').toLocaleString('default', { month: 'long', year: 'numeric' });
-                monthDiv.appendChild(monthHeader);
-
-                const table = document.createElement('table');
-                table.className = 'table table-bordered';
-                table.innerHTML = `
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Day</th>
-                            <th>Content Type</th>
-                            <th>Channel</th>
-                            <th>Status</th>
-                            <th>Content</th>
-                            <th>Approval</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
+                monthDiv.innerHTML = `
+                    <h3>${monthName} ${year}</h3>
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Day</th>
+                                    <th>Content Type</th>
+                                    <th>Channel</th>
+                                    <th>Status</th>
+                                    <th>Text Content</th>
+                                    <th>Hashtags</th>
+                                    <th>Call to Action</th>
+                                    <th>Preview</th>
+                                    <th>Approval</th>
+                                    <th>References</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${monthEntries.map((entry, index) => `
+                                    <tr>
+                                        <td>${entry.date}</td>
+                                        <td>${entry.day}</td>
+                                        <td>${entry.content_type}</td>
+                                        <td>${entry.channel}</td>
+                                        <td>${entry.status}</td>
+                                        <td>${entry.text_content}</td>
+                                        <td>${entry.hashtags || ''}</td>
+                                        <td>${entry.call_to_action || ''}</td>
+                                        <td>
+                                            <img src="/preview/${encodeURIComponent(currentProject)}/${index}" 
+                                                 alt="Preview" 
+                                                 class="img-thumbnail" 
+                                                 style="max-width: 150px; cursor: pointer;"
+                                                 onclick="showPreview(this.src)">
+                                        </td>
+                                        <td>${entry.approval}</td>
+                                        <td>${entry.references}</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-primary" onclick="editEntry(${index})">Edit</button>
+                                            <button class="btn btn-sm btn-danger" onclick="deleteEntry(${index})">Delete</button>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
                 `;
-
-                const tbody = table.querySelector('tbody');
-                entriesByMonth[month].forEach((entry, index) => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${entry.date || ''}</td>
-                        <td>${entry.day || ''}</td>
-                        <td>${entry.content_type || 'NA'}</td>
-                        <td>${entry.channel || 'NA'}</td>
-                        <td>${entry.status || 'NA'}</td>
-                        <td>${entry.text_content || ''}</td>
-                        <td>${entry.approval || 'NA'}</td>
-                        <td>
-                            <button class="btn btn-sm btn-primary" onclick="editEntry(${index})">Edit</button>
-                            <button class="btn btn-sm btn-danger" onclick="deleteEntry(${index})">Delete</button>
-                        </td>
-                    `;
-                    tbody.appendChild(row);
-                });
-
-                monthDiv.appendChild(table);
                 container.appendChild(monthDiv);
+            });
+        }
+
+        function showPreview(src) {
+            // Create a modal for the preview
+            const modal = document.createElement('div');
+            modal.className = 'modal fade';
+            modal.innerHTML = `
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Image Preview</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body text-center">
+                            <img src="${src}" class="img-fluid" alt="Preview">
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            const modalInstance = new bootstrap.Modal(modal);
+            modalInstance.show();
+            modal.addEventListener('hidden.bs.modal', function() {
+                document.body.removeChild(modal);
             });
         }
 
@@ -376,8 +394,11 @@
             document.getElementById('channel').value = entry.channel;
             document.getElementById('status').value = entry.status;
             document.getElementById('textContent').value = entry.text_content;
+            document.getElementById('hashtags').value = entry.hashtags || '';
+            document.getElementById('callToAction').value = entry.call_to_action || '';
             document.getElementById('approval').value = entry.approval;
             document.getElementById('references').value = entry.references;
+            
             entryModal.show();
         }
 
@@ -391,50 +412,37 @@
             const index = document.getElementById('entryIndex').value;
             const entry = {
                 project: currentProject,
+                index: index,
                 date: document.getElementById('entryDate').value,
                 day: document.getElementById('entryDay').value,
                 content_type: document.getElementById('contentType').value,
                 channel: document.getElementById('channel').value,
                 status: document.getElementById('status').value,
                 text_content: document.getElementById('textContent').value,
+                hashtags: document.getElementById('hashtags').value,
+                call_to_action: document.getElementById('callToAction').value,
                 approval: document.getElementById('approval').value,
                 references: document.getElementById('references').value
             };
 
-            if (index === '') {
-                // Add new entry
-                fetch('/add_entry', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(entry)
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        loadCalendarData();
-                        entryModal.hide();
-                    }
-                });
-            } else {
-                // Update existing entry
-                entry.index = parseInt(index);
-                fetch('/update_entry', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(entry)
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        loadCalendarData();
-                        entryModal.hide();
-                    }
-                });
-            }
+            const url = index === '' ? '/add_entry' : '/update_entry';
+            
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(entry)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    entryModal.hide();
+                    loadCalendarData();
+                } else {
+                    alert(data.error || 'Failed to save entry');
+                }
+            });
         }
 
         function deleteEntry(index) {

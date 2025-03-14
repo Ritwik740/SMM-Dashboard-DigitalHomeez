@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, jsonify, session, make_response, flash
+from flask import Flask, render_template, request, redirect, url_for, jsonify, session, make_response, flash, send_file
 import json
 from datetime import datetime
 import calendar
@@ -6,57 +6,59 @@ from dateutil.relativedelta import relativedelta
 import os
 import secrets
 import google.generativeai as genai
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
 import io
 from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
+import textwrap
+from io import BytesIO
+from google.generativeai import types
+from werkzeug.middleware.proxy_fix import ProxyFix
+from flask_talisman import Talisman
+import logging
+from logging.handlers import RotatingFileHandler
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from werkzeug.exceptions import HTTPException
 
 # Load environment variables
 load_dotenv()
 
 app = Flask(__name__)
+app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
 # Production configuration
 app.config.update(
     SECRET_KEY=os.environ.get('SECRET_KEY', secrets.token_hex(32)),
-    SESSION_COOKIE_SECURE=False,  # Set to True in production with HTTPS
+    SESSION_COOKIE_SECURE=True,  # Force HTTPS
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE='Lax',
     PERMANENT_SESSION_LIFETIME=1800,  # 30 minutes session timeout
-    UPLOAD_FOLDER='uploads'
+    UPLOAD_FOLDER='uploads',
+    MAX_CONTENT_LENGTH=16 * 1024 * 1024  # 16MB max file size
+)
+
+# Initialize Talisman for security headers
+Talisman(app, 
+    content_security_policy={
+        'default-src': "'self'",
+        'script-src': ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+        'style-src': ["'self'", "'unsafe-inline'"],
+        'img-src': ["'self'", "data:", "blob:"],
+        'font-src': ["'self'"],
+        'connect-src': ["'self'"]
+    }
 )
 
 # Ensure uploads directory exists
 if not os.path.exists(app.config['UPLOAD_FOLDER']):
     os.makedirs(app.config['UPLOAD_FOLDER'])
 
-# Configure Google Gemini AI
-GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
-genai.configure(api_key=GOOGLE_API_KEY)
-
-# Initialize models
-text_model = genai.GenerativeModel('gemini-2.0-flash')
-vision_model = genai.GenerativeModel('gemini-pro-vision')
-
-# Ensure HTTPS on Render
-if 'RENDER' in os.environ:
-    app.config.update(
-        SESSION_COOKIE_SECURE=True,
-        SESSION_COOKIE_HTTPONLY=True,
-        SESSION_COOKIE_SAMESITE='Lax',
-    )
-
-ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', "admin@alvina19")
-
-# Production error logging
+# Configure logging
 if not app.debug:
-    import logging
-    from logging.handlers import RotatingFileHandler
-    
-    # Use Render's log directory if available
     log_dir = os.environ.get('RENDER_LOG_DIR', 'logs')
     if not os.path.exists(log_dir):
-        os.mkdir(log_dir)
+        os.makedirs(log_dir)
     
     file_handler = RotatingFileHandler(
         os.path.join(log_dir, 'app.log'),
@@ -71,6 +73,37 @@ if not app.debug:
     app.logger.setLevel(logging.INFO)
     app.logger.info('Application startup')
 
+# Configure Google Gemini AI
+GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
+if not GOOGLE_API_KEY:
+    app.logger.error("GOOGLE_API_KEY not found in environment variables")
+    raise ValueError("GOOGLE_API_KEY environment variable is required")
+
+genai.configure(api_key=GOOGLE_API_KEY)
+
+# Initialize models with error handling
+try:
+    text_model = genai.GenerativeModel('gemini-2.0-flash')
+    vision_model = genai.GenerativeModel('gemini-2.0-flash')
+    image_model = genai.GenerativeModel('gemini-2.0-flash')
+    app.logger.info("Successfully initialized Gemini models")
+except Exception as e:
+    app.logger.error(f"Failed to initialize Gemini models: {str(e)}")
+    raise
+
+# Admin password from environment variable
+ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD')
+if not ADMIN_PASSWORD:
+    app.logger.error("ADMIN_PASSWORD not found in environment variables")
+    raise ValueError("ADMIN_PASSWORD environment variable is required")
+
+# Initialize rate limiter
+limiter = Limiter(
+    app=app,
+    key_func=get_remote_address,
+    default_limits=["200 per day", "50 per hour"]
+)
+
 def check_auth():
     return session.get('authenticated', False)
 
@@ -83,13 +116,16 @@ def add_header(response):
     return response
 
 @app.route('/login', methods=['GET', 'POST'])
+@limiter.limit("5 per minute")
 def login():
     if request.method == 'POST':
         password = request.form.get('password')
         if password == ADMIN_PASSWORD:
             session['authenticated'] = True
-            session.permanent = True  # Make session permanent
+            session.permanent = True
+            app.logger.info(f"Successful login from IP: {request.remote_addr}")
             return redirect(url_for('clients'))
+        app.logger.warning(f"Failed login attempt from IP: {request.remote_addr}")
         return render_template('login.html', error="Invalid password")
     return render_template('login.html')
 
@@ -271,6 +307,7 @@ def analyze_reference_images(image_files):
         return None
 
 @app.route('/add_client', methods=['POST'])
+@limiter.limit("10 per minute")
 def add_client():
     if not check_auth():
         return jsonify({"success": False, "error": "Unauthorized"}), 401
@@ -278,60 +315,72 @@ def add_client():
     try:
         data = load_data()
         
-        # Get form data
-        client_data = {
-            'companyName': request.form['companyName'],
-            'numPosts': int(request.form['numPosts']),
-            'numReels': int(request.form['numReels']),
-            'platforms': json.loads(request.form['platforms']),
-            'targetMonth': request.form['targetMonth'],
-            'suggestions': request.form.get('suggestions', '')
-        }
+        # Validate input data
+        company_name = request.form.get('companyName', '').strip()
+        if not company_name:
+            return jsonify({"success": False, "error": "Company name is required"}), 400
+            
+        if company_name in data['clients']:
+            return jsonify({"success": False, "error": "Client already exists"}), 409
+            
+        # Get form data with validation
+        try:
+            client_data = {
+                'companyName': company_name,
+                'numPosts': int(request.form['numPosts']),
+                'numReels': int(request.form['numReels']),
+                'platforms': json.loads(request.form['platforms']),
+                'targetMonth': request.form['targetMonth'],
+                'suggestions': request.form.get('suggestions', '')
+            }
+        except (ValueError, KeyError) as e:
+            return jsonify({"success": False, "error": f"Invalid input data: {str(e)}"}), 400
         
-        # Handle image uploads
+        # Handle image uploads with size validation
         image_insights = None
         if 'suggestionImages' in request.files:
             files = request.files.getlist('suggestionImages')
             if files and any(file.filename != '' for file in files):
+                for file in files:
+                    if file.content_length > app.config['MAX_CONTENT_LENGTH']:
+                        return jsonify({"success": False, "error": "File too large"}), 413
                 image_insights = analyze_reference_images(files)
                 if image_insights:
                     client_data['imageInsights'] = image_insights
         
-        # Generate content calendar with target month and platform selections
-        content_calendar = generate_content_calendar(
-            client_data['companyName'], 
-            '', 
-            '', 
-            '', 
-            client_data['targetMonth'],
-            client_data['platforms'],
-            client_data['numPosts'],
-            client_data['numReels']
-        )
-        if content_calendar:
+        # Generate content calendar with error handling
+        try:
+            content_calendar = generate_content_calendar(
+                client_data['companyName'], 
+                '', 
+                '', 
+                '', 
+                client_data['targetMonth'],
+                client_data['platforms'],
+                client_data['numPosts'],
+                client_data['numReels']
+            )
+            if not content_calendar:
+                return jsonify({"success": False, "error": "Failed to generate content calendar"}), 500
             client_data['contentCalendar'] = content_calendar
-        else:
-            return jsonify({"success": False, "error": "Failed to generate content calendar"})
+        except Exception as e:
+            app.logger.error(f"Error generating content calendar: {str(e)}")
+            return jsonify({"success": False, "error": "Failed to generate content calendar"}), 500
         
-        # Save client data
-        company_name = client_data['companyName']
-        if company_name not in data['clients']:
+        # Save client data with error handling
+        try:
             data['clients'][company_name] = client_data
+            data['projects'][company_name] = {"calendar_entries": []}
             save_data(data)
-            
-            # Create project entries for the content calendar
-            data['projects'][company_name] = {
-                "calendar_entries": []
-            }
-            save_data(data)
-            
+            app.logger.info(f"Successfully added new client: {company_name}")
             return jsonify({"success": True})
-        else:
-            return jsonify({"success": False, "error": "Client already exists"})
+        except Exception as e:
+            app.logger.error(f"Error saving client data: {str(e)}")
+            return jsonify({"success": False, "error": "Failed to save client data"}), 500
             
     except Exception as e:
         app.logger.error(f"Error adding client: {str(e)}")
-        return jsonify({"success": False, "error": str(e)})
+        return jsonify({"success": False, "error": str(e)}), 500
 
 @app.route('/get_calendar_data/<project>')
 def get_calendar_data(project):
@@ -360,6 +409,8 @@ def get_calendar_data(project):
                     'status': 'pending',
                     'text_content': f"{entry['topic']}\n{entry['description']}",
                     'approval': 'pending',
+                    'hashtags': entry['hashtags'],  # Add hashtags separately
+                    'call_to_action': entry['call_to_action'],  # Add call-to-action separately
                     'references': f"Hashtags: {entry['hashtags']}\nCall to Action: {entry['call_to_action']}"
                 }
                 entries.append(calendar_entry)
@@ -472,6 +523,76 @@ def test_gemini():
             "error": str(e)
         }), 500
 
+def generate_preview_image(text_content, content_type, client_name, hashtags, call_to_action):
+    """Generate a preview image using Gemini."""
+    try:
+        # Create prompt for image generation
+        prompt = f"""Create a professional social media advertisement image with the following specifications:
+        - Brand: {client_name}
+        - Main Text: '{text_content}'
+        - Style: Modern and appetizing
+        - Colors: Warm tones with red and orange
+        - Include: Professional product image with visual elements
+        """
+        
+        # Generate image using Gemini
+        response = image_model.generate_content(prompt)
+        
+        # Extract image from response
+        if hasattr(response, 'image') and response.image:
+            # Convert image data to bytes
+            img_data = response.image
+            img_bytes = bytes(img_data)
+            
+            # Create a BytesIO object
+            img_buffer = BytesIO(img_bytes)
+            
+            # Return the image buffer
+            return img_buffer
+                
+        app.logger.error("No image generated in response")
+        return None
+        
+    except Exception as e:
+        app.logger.error(f"Error generating preview image: {str(e)}")
+        return None
+
+@app.route('/preview/<client_name>/<int:index>')
+def preview_image(client_name, index):
+    """Generate and display a preview image for a specific post."""
+    try:
+        # Get calendar data
+        calendar_response = get_calendar_data(client_name)
+        calendar_data = calendar_response.get_json()  # Convert response to JSON
+        
+        if not calendar_data or 'calendar_entries' not in calendar_data or index >= len(calendar_data['calendar_entries']):
+            return "Post not found", 404
+            
+        post = calendar_data['calendar_entries'][index]
+        
+        # Generate preview image
+        img_buffer = generate_preview_image(
+            post['text_content'],
+            post['content_type'],
+            client_name,
+            post.get('hashtags', ''),
+            post.get('call_to_action', '')
+        )
+        
+        if img_buffer is None:
+            return "Failed to generate image", 404
+            
+        # Return the image
+        return send_file(
+            img_buffer,
+            mimetype='image/png',
+            as_attachment=False
+        )
+        
+    except Exception as e:
+        app.logger.error(f"Error in preview_image: {str(e)}")
+        return "Error generating preview", 500
+
 @app.route('/delete_project', methods=['POST'])
 def delete_project():
     if not check_auth():
@@ -502,7 +623,43 @@ def delete_project():
         app.logger.error(f"Error deleting project: {str(e)}")
         return jsonify({"success": False, "error": str(e)}), 500
 
+# Error handlers
+@app.errorhandler(404)
+def not_found_error(error):
+    return render_template('404.html'), 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    app.logger.error(f"Internal server error: {str(error)}")
+    return render_template('500.html'), 500
+
+@app.errorhandler(429)
+def ratelimit_handler(e):
+    return jsonify(error="Rate limit exceeded"), 429
+
+@app.errorhandler(Exception)
+def handle_exception(e):
+    # Handle non-HTTP exceptions
+    app.logger.error(f"Unhandled exception: {str(e)}")
+    return render_template('500.html'), 500
+
 if __name__ == '__main__':
     # Set debug mode based on environment
     debug_mode = os.getenv('FLASK_ENV') == 'development'
-    app.run(host='0.0.0.0', port=int(os.getenv('PORT', 5000)), debug=debug_mode)
+    
+    # Production settings
+    if not debug_mode:
+        # Use gunicorn in production
+        app.run(
+            host='0.0.0.0',
+            port=int(os.getenv('PORT', 5000)),
+            debug=False,
+            use_reloader=False
+        )
+    else:
+        # Development settings
+        app.run(
+            host='0.0.0.0',
+            port=int(os.getenv('PORT', 5000)),
+            debug=True
+        )

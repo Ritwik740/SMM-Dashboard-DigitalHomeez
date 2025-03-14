@@ -1,9 +1,9 @@
 Flask==3.0.2
-python-dateutil==2.8.2
+Werkzeug==3.0.1
 google-generativeai==0.3.2
 Pillow==10.2.0
-requests==2.31.0
 python-dotenv==1.0.1
+Flask-Talisman==1.1.0
+Flask-Limiter==3.5.0
 gunicorn==21.2.0
-Werkzeug==3.0.1
-Flask-Session==0.6.0 
+python-dateutil==2.8.2 
