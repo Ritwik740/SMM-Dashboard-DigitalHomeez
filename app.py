@@ -20,6 +20,8 @@ from logging.handlers import RotatingFileHandler
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from werkzeug.exceptions import HTTPException
+from flask_limiter.storage import RedisStorage
+import redis
 
 # Load environment variables
 load_dotenv()
@@ -35,7 +37,29 @@ app.config.update(
     SESSION_COOKIE_SAMESITE='Lax',
     PERMANENT_SESSION_LIFETIME=1800,  # 30 minutes session timeout
     UPLOAD_FOLDER='uploads',
-    MAX_CONTENT_LENGTH=16 * 1024 * 1024  # 16MB max file size
+    MAX_CONTENT_LENGTH=16 * 1024 * 1024,  # 16MB max file size
+    RATELIMIT_STORAGE_URL=os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
+)
+
+# Initialize Redis storage for rate limiting
+try:
+    redis_storage = RedisStorage(
+        redis.from_url(app.config['RATELIMIT_STORAGE_URL']),
+        prefix="rate_limit"
+    )
+    app.logger.info("Successfully connected to Redis for rate limiting")
+except Exception as e:
+    app.logger.error(f"Failed to connect to Redis: {str(e)}")
+    # Fallback to memory storage if Redis is not available
+    redis_storage = None
+
+# Initialize rate limiter with Redis storage
+limiter = Limiter(
+    app=app,
+    key_func=get_remote_address,
+    storage_uri=app.config['RATELIMIT_STORAGE_URL'] if redis_storage else None,
+    storage_options={"prefix": "rate_limit"},
+    default_limits=["200 per day", "50 per hour"]
 )
 
 # Initialize Talisman for security headers
@@ -43,10 +67,15 @@ Talisman(app,
     content_security_policy={
         'default-src': "'self'",
         'script-src': ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-        'style-src': ["'self'", "'unsafe-inline'"],
-        'img-src': ["'self'", "data:", "blob:"],
-        'font-src': ["'self'"],
-        'connect-src': ["'self'"]
+        'style-src': ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://fonts.googleapis.com"],
+        'img-src': ["'self'", "data:", "blob:", "https:", "http:"],
+        'font-src': ["'self'", "https://fonts.gstatic.com", "data:"],
+        'connect-src': ["'self'", "https://generativelanguage.googleapis.com"],
+        'frame-src': ["'self'"],
+        'media-src': ["'self'", "data:", "blob:"],
+        'object-src': ["'none'"],
+        'base-uri': ["'self'"],
+        'form-action': ["'self'"]
     }
 )
 
@@ -96,13 +125,6 @@ ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD')
 if not ADMIN_PASSWORD:
     app.logger.error("ADMIN_PASSWORD not found in environment variables")
     raise ValueError("ADMIN_PASSWORD environment variable is required")
-
-# Initialize rate limiter
-limiter = Limiter(
-    app=app,
-    key_func=get_remote_address,
-    default_limits=["200 per day", "50 per hour"]
-)
 
 def check_auth():
     return session.get('authenticated', False)
