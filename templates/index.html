@@ -252,125 +252,102 @@
             fetch(`/get_calendar_data/${currentProject}`)
                 .then(response => response.json())
                 .then(data => {
-                    currentEntries = data.calendar_entries;
-                    displayCalendar();
+                    currentEntries = data.calendar_entries || [];
+                    displayCalendar(currentEntries);
+                })
+                .catch(error => {
+                    console.error('Error loading calendar data:', error);
+                    alert('Error loading calendar data');
                 });
         }
 
-        function displayCalendar() {
+        function displayCalendar(entries) {
             const container = document.getElementById('calendarContainer');
             container.innerHTML = '';
 
-            // Group entries by month first
+            if (!entries || entries.length === 0) {
+                container.innerHTML = `
+                    <div class="alert alert-info">
+                        <h4>No Content Calendar Available</h4>
+                        <p>This project currently has no content calendar entries. You can:</p>
+                        <ul>
+                            <li>Add new entries manually using the "Add New Entry" button</li>
+                            <li>Generate a content calendar by adding a new client with content requirements</li>
+                        </ul>
+                    </div>
+                `;
+                return;
+            }
+
+            // Group entries by month
             const entriesByMonth = {};
-            currentEntries.forEach(entry => {
-                const month = entry.date.substring(0, 7);
-                if (!entriesByMonth[month]) {
-                    entriesByMonth[month] = [];
+            entries.forEach(entry => {
+                if (entry.date) {
+                    const month = entry.date.substring(0, 7); // Get YYYY-MM
+                    if (!entriesByMonth[month]) {
+                        entriesByMonth[month] = [];
+                    }
+                    entriesByMonth[month].push(entry);
                 }
-                entriesByMonth[month].push(entry);
             });
 
-            // Create current month's table
-            const currentDate = new Date();
-            const currentMonth = currentDate.toISOString().substring(0, 7);
-            const monthName = currentDate.toLocaleString('default', { month: 'long', year: 'numeric' });
+            if (Object.keys(entriesByMonth).length === 0) {
+                container.innerHTML = `
+                    <div class="alert alert-warning">
+                        <h4>No Dated Entries Found</h4>
+                        <p>There are entries in the calendar, but none have dates assigned. Please add dates to your entries to view them in the calendar view.</p>
+                    </div>
+                `;
+                return;
+            }
 
-            const monthDiv = document.createElement('div');
-            monthDiv.className = 'calendar-month';
-            monthDiv.innerHTML = `
-                <h3 class="mb-3">${monthName}</h3>
-                <div class="table-responsive">
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Day</th>
-                                <th>Content Type</th>
-                                <th>Channel</th>
-                                <th>Status</th>
-                                <th>Text Content</th>
-                                <th>Approval</th>
-                                <th>References</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${!entriesByMonth[currentMonth] || entriesByMonth[currentMonth].length === 0 ? 
-                                '<tr><td colspan="9" class="text-center text-muted">No entries yet. Click "Add New Entry" to create one.</td></tr>' :
-                                entriesByMonth[currentMonth].map((entry, index) => `
-                                    <tr>
-                                        <td>${entry.date}</td>
-                                        <td>${entry.day}</td>
-                                        <td>${entry.content_type}</td>
-                                        <td>${entry.channel}</td>
-                                        <td>${entry.status}</td>
-                                        <td>${entry.text_content}</td>
-                                        <td>${entry.approval}</td>
-                                        <td>${entry.references}</td>
-                                        <td>
-                                            <button class="btn btn-sm btn-primary" onclick="editEntry(${currentEntries.indexOf(entry)})">Edit</button>
-                                            <button class="btn btn-sm btn-danger" onclick="deleteEntry(${currentEntries.indexOf(entry)})">Delete</button>
-                                        </td>
-                                    </tr>
-                                `).join('')}
-                        </tbody>
-                    </table>
-                </div>
-            `;
-            container.appendChild(monthDiv);
-
-            // Sort months in descending order and filter out current month
-            const sortedMonths = Object.keys(entriesByMonth)
-                .filter(month => month !== currentMonth)
-                .sort()
-                .reverse();
-
-            // Display other months
-            sortedMonths.forEach(month => {
-                const monthEntries = entriesByMonth[month];
+            // Display each month
+            Object.keys(entriesByMonth).sort().forEach(month => {
                 const monthDiv = document.createElement('div');
                 monthDiv.className = 'calendar-month';
                 
-                const monthName = new Date(month + '-01').toLocaleString('default', { month: 'long', year: 'numeric' });
-                monthDiv.innerHTML = `
-                    <h3 class="mb-3">${monthName}</h3>
-                    <div class="table-responsive">
-                        <table class="table table-bordered">
-                            <thead>
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Day</th>
-                                    <th>Content Type</th>
-                                    <th>Channel</th>
-                                    <th>Status</th>
-                                    <th>Text Content</th>
-                                    <th>Approval</th>
-                                    <th>References</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${monthEntries.map((entry, index) => `
-                                    <tr>
-                                        <td>${entry.date}</td>
-                                        <td>${entry.day}</td>
-                                        <td>${entry.content_type}</td>
-                                        <td>${entry.channel}</td>
-                                        <td>${entry.status}</td>
-                                        <td>${entry.text_content}</td>
-                                        <td>${entry.approval}</td>
-                                        <td>${entry.references}</td>
-                                        <td>
-                                            <button class="btn btn-sm btn-primary" onclick="editEntry(${currentEntries.indexOf(entry)})">Edit</button>
-                                            <button class="btn btn-sm btn-danger" onclick="deleteEntry(${currentEntries.indexOf(entry)})">Delete</button>
-                                        </td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                    </div>
+                const monthHeader = document.createElement('h3');
+                monthHeader.textContent = new Date(month + '-01').toLocaleString('default', { month: 'long', year: 'numeric' });
+                monthDiv.appendChild(monthHeader);
+
+                const table = document.createElement('table');
+                table.className = 'table table-bordered';
+                table.innerHTML = `
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Day</th>
+                            <th>Content Type</th>
+                            <th>Channel</th>
+                            <th>Status</th>
+                            <th>Content</th>
+                            <th>Approval</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
                 `;
+
+                const tbody = table.querySelector('tbody');
+                entriesByMonth[month].forEach((entry, index) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${entry.date || ''}</td>
+                        <td>${entry.day || ''}</td>
+                        <td>${entry.content_type || 'NA'}</td>
+                        <td>${entry.channel || 'NA'}</td>
+                        <td>${entry.status || 'NA'}</td>
+                        <td>${entry.text_content || ''}</td>
+                        <td>${entry.approval || 'NA'}</td>
+                        <td>
+                            <button class="btn btn-sm btn-primary" onclick="editEntry(${index})">Edit</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteEntry(${index})">Delete</button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+
+                monthDiv.appendChild(table);
                 container.appendChild(monthDiv);
             });
         }

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client Management - SMM Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .card {
+            transition: transform 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .platform-checkbox {
+            margin-right: 15px;
+        }
+        #suggestionImagePreview {
+            max-width: 300px;
+            max-height: 300px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">SMM Dashboard</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/clients">Clients</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/logout">Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="row mb-5">
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-user-plus fa-3x mb-3 text-primary"></i>
+                        <h3>Add New Client</h3>
+                        <p>Create a new client profile and content plan</p>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addClientModal">
+                            Add Client
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-users fa-3x mb-3 text-success"></i>
+                        <h3>View Existing Clients</h3>
+                        <p>Manage and view existing client dashboards</p>
+                        <a href="/dashboard" class="btn btn-success">View Clients</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Client Modal -->
+    <div class="modal fade" id="addClientModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Client</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addClientForm">
+                        <div class="mb-3">
+                            <label class="form-label">Client Company Name</label>
+                            <input type="text" class="form-control" name="companyName" required>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Number of Posts</label>
+                                <select class="form-select" name="numPosts">
+                                    <option value="0">0</option>
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                    <option value="10">10</option>
+                                    <option value="15">15</option>
+                                    <option value="20">20</option>
+                                    <option value="30">30</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Number of Reels</label>
+                                <select class="form-select" name="numReels">
+                                    <option value="0">0</option>
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                    <option value="10">10</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Target Month</label>
+                            <input type="month" class="form-control" name="targetMonth" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Platforms</label>
+                            <div class="d-flex flex-wrap">
+                                <div class="platform-checkbox">
+                                    <input type="checkbox" class="form-check-input" name="platforms" value="facebook" id="facebook">
+                                    <label class="form-check-label" for="facebook">Facebook</label>
+                                </div>
+                                <div class="platform-checkbox">
+                                    <input type="checkbox" class="form-check-input" name="platforms" value="instagram" id="instagram">
+                                    <label class="form-check-label" for="instagram">Instagram</label>
+                                </div>
+                                <div class="platform-checkbox">
+                                    <input type="checkbox" class="form-check-input" name="platforms" value="linkedin" id="linkedin">
+                                    <label class="form-check-label" for="linkedin">LinkedIn</label>
+                                </div>
+                                <div class="platform-checkbox">
+                                    <input type="checkbox" class="form-check-input" name="platforms" value="whatsapp" id="whatsapp">
+                                    <label class="form-check-label" for="whatsapp">WhatsApp</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Additional Suggestions</label>
+                            <textarea class="form-control" name="suggestions" rows="3" placeholder="Enter any additional suggestions or requirements"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Reference Images</label>
+                            <input type="file" class="form-control" name="suggestionImages" accept="image/*" multiple>
+                            <div id="suggestionImagePreview" class="mt-2"></div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="submitClientForm()">Add Client</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function submitClientForm() {
+            const form = document.getElementById('addClientForm');
+            const formData = new FormData(form);
+            
+            // Get selected platforms
+            const platforms = [];
+            document.querySelectorAll('input[name="platforms"]:checked').forEach(checkbox => {
+                platforms.push(checkbox.value);
+            });
+
+            // Add platforms to formData
+            formData.set('platforms', JSON.stringify(platforms));
+
+            fetch('/add_client', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Client added successfully!');
+                    window.location.href = '/dashboard';
+                } else {
+                    alert('Error adding client: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while adding the client');
+            });
+        }
+
+        // Image preview functionality
+        document.querySelector('input[name="suggestionImages"]').addEventListener('change', function(e) {
+            const preview = document.getElementById('suggestionImagePreview');
+            preview.innerHTML = '';
+            
+            [...e.target.files].forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.className = 'img-thumbnail m-1';
+                    img.style.maxHeight = '150px';
+                    preview.appendChild(img);
+                }
+                reader.readAsDataURL(file);
+            });
+        });
+    </script>
+</body>
+</html> 

@@ -1,10 +1,52 @@
 {
+    "clients": {
+        "Burger King": {
+            "companyName": "Burger King",
+            "numPosts": 2,
+            "numReels": 1,
+            "platforms": [
+                "facebook",
+                "instagram"
+            ],
+            "targetMonth": "2025-05",
+            "suggestions": "",
+            "contentCalendar": "[{\"date\": \"2025-05-05\", \"platform\": \"Facebook\", \"content_type\": \"Image\", \"topic\": \"Whopper Wednesday\", \"description\": \"Enjoy a flame-grilled Whopper for a special price every Wednesday! Don't miss out!\", \"hashtags\": \"#WhopperWednesday #BurgerKing #Deals #BurgerDeals\", \"call_to_action\": \"Visit us today!\"}, {\"date\": \"2025-05-15\", \"platform\": \"Instagram\", \"content_type\": \"Reel\", \"topic\": \"New Fiery Nuggets\", \"description\": \"Try our new Fiery Nuggets! The perfect blend of spice and crispy goodness.\", \"hashtags\": \"#FieryNuggets #BurgerKing #SpicyFood #FoodReel\", \"call_to_action\": \"Order now online!\"}, {\"date\": \"2025-05-25\", \"platform\": \"Instagram\", \"content_type\": \"Carousel\", \"topic\": \"Summer Value Menu\", \"description\": \"Cool down with our Summer Value Menu! Delicious treats at affordable prices.\", \"hashtags\": \"#SummerMenu #BurgerKing #ValueMenu #SummerDeals\", \"call_to_action\": \"Check it out in store!\"}]"
+        }
+    },
     "projects": {
-        "Project 1": {
-            "calendar_entries": []
-        },
-        "Default project": {
-            "calendar_entries": []
+        "Burger King": {
+            "calendar_entries": [
+                {
+                    "date": "2025-05-05",
+                    "day": "Monday",
+                    "content_type": "Image",
+                    "channel": "Facebook",
+                    "status": "pending",
+                    "text_content": "Whopper Wednesday\nEnjoy a flame-grilled Whopper for a special price every Wednesday! Don't miss out!",
+                    "approval": "pending",
+                    "references": "Hashtags: #WhopperWednesday #BurgerKing #Deals #BurgerDeals\nCall to Action: Visit us today!"
+                },
+                {
+                    "date": "2025-05-15",
+                    "day": "Thursday",
+                    "content_type": "Reel",
+                    "channel": "Instagram",
+                    "status": "pending",
+                    "text_content": "New Fiery Nuggets\nTry our new Fiery Nuggets! The perfect blend of spice and crispy goodness.",
+                    "approval": "pending",
+                    "references": "Hashtags: #FieryNuggets #BurgerKing #SpicyFood #FoodReel\nCall to Action: Order now online!"
+                },
+                {
+                    "date": "2025-05-25",
+                    "day": "Sunday",
+                    "content_type": "Carousel",
+                    "channel": "Instagram",
+                    "status": "pending",
+                    "text_content": "Summer Value Menu\nCool down with our Summer Value Menu! Delicious treats at affordable prices.",
+                    "approval": "pending",
+                    "references": "Hashtags: #SummerMenu #BurgerKing #ValueMenu #SummerDeals\nCall to Action: Check it out in store!"
+                }
+            ]
         }
     }
 }

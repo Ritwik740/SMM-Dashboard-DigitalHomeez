@@ -1,1 +1,96 @@
 2025-03-13 06:59:59,090 INFO: Application startup [in C:\Users\hp\OneDrive\Desktop\SMM\app.py:37]
+2025-03-14 13:10:44,813 INFO: Application startup [in C:\Users\hp\OneDrive\Desktop\SMM-Dashboard-DigitalHomeez\app.py:70]
+2025-03-14 13:14:11,407 INFO: Application startup [in C:\Users\hp\OneDrive\Desktop\SMM-Dashboard-DigitalHomeez\app.py:70]
+2025-03-14 13:15:21,508 ERROR: Error generating content calendar: 404 models/gemini-pro is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods. [in C:\Users\hp\OneDrive\Desktop\SMM-Dashboard-DigitalHomeez\app.py:148]
+2025-03-14 13:15:21,510 ERROR: Error adding client: 'clients' [in C:\Users\hp\OneDrive\Desktop\SMM-Dashboard-DigitalHomeez\app.py:215]
+2025-03-14 13:17:34,557 INFO: Application startup [in C:\Users\hp\OneDrive\Desktop\SMM-Dashboard-DigitalHomeez\app.py:70]
+2025-03-14 13:18:27,287 ERROR: Error generating content calendar: 400 API key not valid. Please pass a valid API key. [reason: "API_KEY_INVALID"
+domain: "googleapis.com"
+metadata {
+  key: "service"
+  value: "generativelanguage.googleapis.com"
+}
+, locale: "en-US"
+message: "API key not valid. Please pass a valid API key."
+] [in C:\Users\hp\OneDrive\Desktop\SMM-Dashboard-DigitalHomeez\app.py:148]
+2025-03-14 13:18:27,288 ERROR: Error adding client: 'clients' [in C:\Users\hp\OneDrive\Desktop\SMM-Dashboard-DigitalHomeez\app.py:215]
+2025-03-14 13:19:39,267 INFO: Application startup [in C:\Users\hp\OneDrive\Desktop\SMM-Dashboard-DigitalHomeez\app.py:70]
+2025-03-14 13:20:05,768 ERROR: Error generating content calendar: 400 API key not valid. Please pass a valid API key. [reason: "API_KEY_INVALID"
+domain: "googleapis.com"
+metadata {
+  key: "service"
+  value: "generativelanguage.googleapis.com"
+}
+, locale: "en-US"
+message: "API key not valid. Please pass a valid API key."
+] [in C:\Users\hp\OneDrive\Desktop\SMM-Dashboard-DigitalHomeez\app.py:148]
+2025-03-14 13:22:23,959 INFO: Application startup [in C:\Users\hp\OneDrive\Desktop\SMM-Dashboard-DigitalHomeez\app.py:70]
+2025-03-14 13:23:14,031 ERROR: Error generating content calendar: 400 API key not valid. Please pass a valid API key. [reason: "API_KEY_INVALID"
+domain: "googleapis.com"
+metadata {
+  key: "service"
+  value: "generativelanguage.googleapis.com"
+}
+, locale: "en-US"
+message: "API key not valid. Please pass a valid API key."
+] [in C:\Users\hp\OneDrive\Desktop\SMM-Dashboard-DigitalHomeez\app.py:154]
+2025-03-14 13:27:27,688 INFO: Application startup [in C:\Users\hp\OneDrive\Desktop\SMM-Dashboard-DigitalHomeez\app.py:70]
+2025-03-14 13:31:14,210 INFO: Application startup [in C:\Users\hp\OneDrive\Desktop\SMM-Dashboard-DigitalHomeez\app.py:70]
+2025-03-14 13:31:16,045 INFO: Application startup [in C:\Users\hp\OneDrive\Desktop\SMM-Dashboard-DigitalHomeez\app.py:70]
+2025-03-14 13:32:01,812 ERROR: Error generating content calendar: 404 models/gemini-pro is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods. [in C:\Users\hp\OneDrive\Desktop\SMM-Dashboard-DigitalHomeez\app.py:154]
+2025-03-14 13:33:54,531 INFO: Application startup [in C:\Users\hp\OneDrive\Desktop\SMM-Dashboard-DigitalHomeez\app.py:70]
+2025-03-14 13:36:24,804 ERROR: Error generating content calendar: 400 API key expired. Please renew the API key. [reason: "API_KEY_INVALID"
+domain: "googleapis.com"
+metadata {
+  key: "service"
+  value: "generativelanguage.googleapis.com"
+}
+, locale: "en-US"
+message: "API key expired. Please renew the API key."
+] [in C:\Users\hp\OneDrive\Desktop\SMM-Dashboard-DigitalHomeez\app.py:154]
+2025-03-14 13:37:28,571 INFO: Application startup [in C:\Users\hp\OneDrive\Desktop\SMM-Dashboard-DigitalHomeez\app.py:70]
+2025-03-14 13:37:35,761 INFO: Application startup [in C:\Users\hp\OneDrive\Desktop\SMM-Dashboard-DigitalHomeez\app.py:74]
+2025-03-14 13:38:57,871 INFO: Application startup [in C:\Users\hp\OneDrive\Desktop\SMM-Dashboard-DigitalHomeez\app.py:74]
+2025-03-14 13:39:33,595 INFO: Application startup [in C:\Users\hp\OneDrive\Desktop\SMM-Dashboard-DigitalHomeez\app.py:74]
+2025-03-14 13:40:02,693 INFO: Application startup [in C:\Users\hp\OneDrive\Desktop\SMM-Dashboard-DigitalHomeez\app.py:72]
+2025-03-14 13:40:34,161 INFO: Application startup [in C:\Users\hp\OneDrive\Desktop\SMM-Dashboard-DigitalHomeez\app.py:72]
+2025-03-14 13:40:39,635 INFO: Application startup [in C:\Users\hp\OneDrive\Desktop\SMM-Dashboard-DigitalHomeez\app.py:72]
+2025-03-14 13:41:17,262 INFO: Application startup [in C:\Users\hp\OneDrive\Desktop\SMM-Dashboard-DigitalHomeez\app.py:72]
+2025-03-14 13:42:45,909 INFO: Application startup [in C:\Users\hp\OneDrive\Desktop\SMM-Dashboard-DigitalHomeez\app.py:72]
+2025-03-14 13:47:40,341 ERROR: Error generating content calendar: 400 API key expired. Please renew the API key. [reason: "API_KEY_INVALID"
+domain: "googleapis.com"
+metadata {
+  key: "service"
+  value: "generativelanguage.googleapis.com"
+}
+, locale: "en-US"
+message: "API key expired. Please renew the API key."
+] [in C:\Users\hp\OneDrive\Desktop\SMM-Dashboard-DigitalHomeez\app.py:154]
+2025-03-14 13:49:36,249 INFO: Application startup [in C:\Users\hp\OneDrive\Desktop\SMM-Dashboard-DigitalHomeez\app.py:72]
+2025-03-14 13:49:38,039 INFO: Application startup [in C:\Users\hp\OneDrive\Desktop\SMM-Dashboard-DigitalHomeez\app.py:72]
+2025-03-14 13:52:16,119 INFO: Application startup [in C:\Users\hp\OneDrive\Desktop\SMM-Dashboard-DigitalHomeez\app.py:72]
+2025-03-14 13:53:25,343 INFO: Application startup [in C:\Users\hp\OneDrive\Desktop\SMM-Dashboard-DigitalHomeez\app.py:72]
+2025-03-14 13:54:30,234 INFO: Application startup [in C:\Users\hp\OneDrive\Desktop\SMM-Dashboard-DigitalHomeez\app.py:72]
+2025-03-14 13:54:34,785 INFO: Application startup [in C:\Users\hp\OneDrive\Desktop\SMM-Dashboard-DigitalHomeez\app.py:72]
+2025-03-14 13:54:43,607 INFO: Application startup [in C:\Users\hp\OneDrive\Desktop\SMM-Dashboard-DigitalHomeez\app.py:72]
+2025-03-14 13:54:46,171 INFO: Application startup [in C:\Users\hp\OneDrive\Desktop\SMM-Dashboard-DigitalHomeez\app.py:72]
+2025-03-14 13:56:23,408 INFO: Application startup [in C:\Users\hp\OneDrive\Desktop\SMM-Dashboard-DigitalHomeez\app.py:72]
+2025-03-14 14:01:37,490 INFO: Application startup [in C:\Users\hp\OneDrive\Desktop\SMM-Dashboard-DigitalHomeez\app.py:72]
+2025-03-14 14:02:08,135 INFO: Application startup [in C:\Users\hp\OneDrive\Desktop\SMM-Dashboard-DigitalHomeez\app.py:72]
+2025-03-14 14:02:56,685 INFO: Application startup [in C:\Users\hp\OneDrive\Desktop\SMM-Dashboard-DigitalHomeez\app.py:72]
+2025-03-14 14:02:58,478 INFO: Application startup [in C:\Users\hp\OneDrive\Desktop\SMM-Dashboard-DigitalHomeez\app.py:72]
+2025-03-14 14:04:54,795 INFO: Application startup [in C:\Users\hp\OneDrive\Desktop\SMM-Dashboard-DigitalHomeez\app.py:72]
+2025-03-14 14:05:00,411 INFO: Application startup [in C:\Users\hp\OneDrive\Desktop\SMM-Dashboard-DigitalHomeez\app.py:72]
+2025-03-14 14:05:02,650 INFO: Application startup [in C:\Users\hp\OneDrive\Desktop\SMM-Dashboard-DigitalHomeez\app.py:72]
+2025-03-14 14:10:04,814 INFO: Application startup [in C:\Users\hp\OneDrive\Desktop\SMM-Dashboard-DigitalHomeez\app.py:72]
+2025-03-14 14:10:05,188 INFO: Application startup [in C:\Users\hp\OneDrive\Desktop\SMM-Dashboard-DigitalHomeez\app.py:72]
+2025-03-14 14:10:52,068 INFO: Application startup [in C:\Users\hp\OneDrive\Desktop\SMM-Dashboard-DigitalHomeez\app.py:72]
+2025-03-14 14:10:52,069 INFO: Application startup [in C:\Users\hp\OneDrive\Desktop\SMM-Dashboard-DigitalHomeez\app.py:72]
+2025-03-14 14:11:22,317 INFO: Application startup [in C:\Users\hp\OneDrive\Desktop\SMM-Dashboard-DigitalHomeez\app.py:72]
+2025-03-14 14:11:22,318 INFO: Application startup [in C:\Users\hp\OneDrive\Desktop\SMM-Dashboard-DigitalHomeez\app.py:72]
+2025-03-14 14:14:16,805 INFO: Application startup [in C:\Users\hp\OneDrive\Desktop\SMM-Dashboard-DigitalHomeez\app.py:72]
+2025-03-14 14:14:18,699 INFO: Application startup [in C:\Users\hp\OneDrive\Desktop\SMM-Dashboard-DigitalHomeez\app.py:72]
+2025-03-14 14:14:29,266 INFO: Application startup [in C:\Users\hp\OneDrive\Desktop\SMM-Dashboard-DigitalHomeez\app.py:72]
+2025-03-14 14:28:29,625 INFO: Application startup [in C:\Users\hp\OneDrive\Desktop\SMM-Dashboard-DigitalHomeez\app.py:72]
+2025-03-14 14:28:33,357 INFO: Application startup [in C:\Users\hp\OneDrive\Desktop\SMM-Dashboard-DigitalHomeez\app.py:72]
+2025-03-14 14:29:56,130 INFO: Application startup [in C:\Users\hp\OneDrive\Desktop\SMM-Dashboard-DigitalHomeez\app.py:72]
