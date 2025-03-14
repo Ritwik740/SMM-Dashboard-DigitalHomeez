@@ -20,7 +20,6 @@ from logging.handlers import RotatingFileHandler
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from werkzeug.exceptions import HTTPException
-from flask_limiter.storage import RedisStorage
 import redis
 
 # Load environment variables
@@ -41,23 +40,19 @@ app.config.update(
     RATELIMIT_STORAGE_URL=os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
 )
 
-# Initialize Redis storage for rate limiting
+# Initialize Redis connection for rate limiting
 try:
-    redis_storage = RedisStorage(
-        redis.from_url(app.config['RATELIMIT_STORAGE_URL']),
-        prefix="rate_limit"
-    )
+    redis_client = redis.from_url(app.config['RATELIMIT_STORAGE_URL'])
     app.logger.info("Successfully connected to Redis for rate limiting")
 except Exception as e:
     app.logger.error(f"Failed to connect to Redis: {str(e)}")
-    # Fallback to memory storage if Redis is not available
-    redis_storage = None
+    redis_client = None
 
-# Initialize rate limiter with Redis storage
+# Initialize rate limiter
 limiter = Limiter(
     app=app,
     key_func=get_remote_address,
-    storage_uri=app.config['RATELIMIT_STORAGE_URL'] if redis_storage else None,
+    storage_uri=app.config['RATELIMIT_STORAGE_URL'] if redis_client else None,
     storage_options={"prefix": "rate_limit"},
     default_limits=["200 per day", "50 per hour"]
 )
