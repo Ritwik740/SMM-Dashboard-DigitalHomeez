@@ -5,84 +5,63 @@ import calendar
 from dateutil.relativedelta import relativedelta
 import os
 import secrets
-import google.generativeai as genai
+from google import genai
 from PIL import Image, ImageDraw, ImageFont
 import io
 from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
 import textwrap
 from io import BytesIO
-from google.generativeai import types
-from werkzeug.middleware.proxy_fix import ProxyFix
-from flask_talisman import Talisman
-import logging
-from logging.handlers import RotatingFileHandler
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
-from werkzeug.exceptions import HTTPException
-import redis
+from google.genai import types
 
 # Load environment variables
 load_dotenv()
 
 app = Flask(__name__)
-app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
 # Production configuration
 app.config.update(
     SECRET_KEY=os.environ.get('SECRET_KEY', secrets.token_hex(32)),
-    SESSION_COOKIE_SECURE=True,  # Force HTTPS
+    SESSION_COOKIE_SECURE=True,  # Always use secure cookies for better security
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE='Lax',
     PERMANENT_SESSION_LIFETIME=1800,  # 30 minutes session timeout
-    UPLOAD_FOLDER='uploads',
-    MAX_CONTENT_LENGTH=16 * 1024 * 1024,  # 16MB max file size
-    RATELIMIT_STORAGE_URL=os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
-)
-
-# Initialize Redis connection for rate limiting
-try:
-    redis_client = redis.from_url(app.config['RATELIMIT_STORAGE_URL'])
-    app.logger.info("Successfully connected to Redis for rate limiting")
-except Exception as e:
-    app.logger.error(f"Failed to connect to Redis: {str(e)}")
-    redis_client = None
-
-# Initialize rate limiter
-limiter = Limiter(
-    app=app,
-    key_func=get_remote_address,
-    storage_uri=app.config['RATELIMIT_STORAGE_URL'] if redis_client else None,
-    storage_options={"prefix": "rate_limit"},
-    default_limits=["200 per day", "50 per hour"]
-)
-
-# Initialize Talisman for security headers
-Talisman(app, 
-    content_security_policy={
-        'default-src': "'self'",
-        'script-src': ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-        'style-src': ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://fonts.googleapis.com"],
-        'img-src': ["'self'", "data:", "blob:", "https:", "http:"],
-        'font-src': ["'self'", "https://fonts.gstatic.com", "data:"],
-        'connect-src': ["'self'", "https://generativelanguage.googleapis.com"],
-        'frame-src': ["'self'"],
-        'media-src': ["'self'", "data:", "blob:"],
-        'object-src': ["'none'"],
-        'base-uri': ["'self'"],
-        'form-action': ["'self'"]
-    }
+    UPLOAD_FOLDER='uploads'
 )
 
 # Ensure uploads directory exists
 if not os.path.exists(app.config['UPLOAD_FOLDER']):
     os.makedirs(app.config['UPLOAD_FOLDER'])
 
-# Configure logging
+# Configure Google Gemini AI
+GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
+
+# Initialize client
+client = genai.Client()
+
+# Model IDs
+TEXT_MODEL_ID = "models/gemini-2.0-flash"
+IMAGE_MODEL_ID = "models/gemini-2.0-flash-exp"
+
+# Ensure HTTPS on Render
+if 'RENDER' in os.environ:
+    app.config.update(
+        SESSION_COOKIE_SECURE=True,
+        SESSION_COOKIE_HTTPONLY=True,
+        SESSION_COOKIE_SAMESITE='Lax',
+    )
+
+ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD', "admin@alvina19")
+
+# Production error logging
 if not app.debug:
+    import logging
+    from logging.handlers import RotatingFileHandler
+    
+    # Use Render's log directory if available
     log_dir = os.environ.get('RENDER_LOG_DIR', 'logs')
     if not os.path.exists(log_dir):
-        os.makedirs(log_dir)
+        os.mkdir(log_dir)
     
     file_handler = RotatingFileHandler(
         os.path.join(log_dir, 'app.log'),
@@ -97,30 +76,6 @@ if not app.debug:
     app.logger.setLevel(logging.INFO)
     app.logger.info('Application startup')
 
-# Configure Google Gemini AI
-GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY')
-if not GOOGLE_API_KEY:
-    app.logger.error("GOOGLE_API_KEY not found in environment variables")
-    raise ValueError("GOOGLE_API_KEY environment variable is required")
-
-genai.configure(api_key=GOOGLE_API_KEY)
-
-# Initialize models with error handling
-try:
-    text_model = genai.GenerativeModel('gemini-2.0-flash')
-    vision_model = genai.GenerativeModel('gemini-2.0-flash')
-    image_model = genai.GenerativeModel('gemini-2.0-flash')
-    app.logger.info("Successfully initialized Gemini models")
-except Exception as e:
-    app.logger.error(f"Failed to initialize Gemini models: {str(e)}")
-    raise
-
-# Admin password from environment variable
-ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD')
-if not ADMIN_PASSWORD:
-    app.logger.error("ADMIN_PASSWORD not found in environment variables")
-    raise ValueError("ADMIN_PASSWORD environment variable is required")
-
 def check_auth():
     return session.get('authenticated', False)
 
@@ -133,16 +88,13 @@ def add_header(response):
     return response
 
 @app.route('/login', methods=['GET', 'POST'])
-@limiter.limit("5 per minute")
 def login():
     if request.method == 'POST':
         password = request.form.get('password')
         if password == ADMIN_PASSWORD:
             session['authenticated'] = True
-            session.permanent = True
-            app.logger.info(f"Successful login from IP: {request.remote_addr}")
+            session.permanent = True  # Make session permanent
             return redirect(url_for('clients'))
-        app.logger.warning(f"Failed login attempt from IP: {request.remote_addr}")
         return render_template('login.html', error="Invalid password")
     return render_template('login.html')
 
@@ -182,6 +134,18 @@ def clients():
         return redirect(url_for('login'))
     data = load_data()
     return render_template('client_management.html', clients=data.get('clients', {}))
+
+def generate_text(prompt):
+    """Generate text using Gemini."""
+    try:
+        response = client.models.generate_content(
+            model=TEXT_MODEL_ID,
+            contents=prompt
+        )
+        return response.text
+    except Exception as e:
+        app.logger.error(f"Error generating text: {str(e)}")
+        return None
 
 def generate_content_calendar(client_name, industry, target_audience, goals, target_month, platforms, num_posts, num_reels):
     try:
@@ -259,8 +223,11 @@ def generate_content_calendar(client_name, industry, target_audience, goals, tar
         IMPORTANT: Your response must be ONLY the JSON array, with no additional text or formatting.
         """
         
-        response = text_model.generate_content(prompt)
-        response_text = response.text.strip()
+        response_text = generate_text(prompt)
+        if not response_text:
+            return None
+            
+        response_text = response_text.strip()
         
         # Remove any markdown formatting if present
         if response_text.startswith('```json'):
@@ -313,10 +280,13 @@ def analyze_reference_images(image_files):
         image_insights = []
         for image in image_files:
             img = Image.open(image)
-            response = vision_model.generate_content([
-                "Analyze this reference image and provide insights for social media content creation. Include style, mood, color scheme, and potential content themes.",
-                img
-            ])
+            response = client.models.generate_content(
+                model=IMAGE_MODEL_ID,
+                contents=[
+                    "Analyze this reference image and provide insights for social media content creation. Include style, mood, color scheme, and potential content themes.",
+                    img
+                ]
+            )
             image_insights.append(response.text)
         return "\n\n".join(image_insights)
     except Exception as e:
@@ -324,7 +294,6 @@ def analyze_reference_images(image_files):
         return None
 
 @app.route('/add_client', methods=['POST'])
-@limiter.limit("10 per minute")
 def add_client():
     if not check_auth():
         return jsonify({"success": False, "error": "Unauthorized"}), 401
@@ -332,72 +301,60 @@ def add_client():
     try:
         data = load_data()
         
-        # Validate input data
-        company_name = request.form.get('companyName', '').strip()
-        if not company_name:
-            return jsonify({"success": False, "error": "Company name is required"}), 400
-            
-        if company_name in data['clients']:
-            return jsonify({"success": False, "error": "Client already exists"}), 409
-            
-        # Get form data with validation
-        try:
-            client_data = {
-                'companyName': company_name,
-                'numPosts': int(request.form['numPosts']),
-                'numReels': int(request.form['numReels']),
-                'platforms': json.loads(request.form['platforms']),
-                'targetMonth': request.form['targetMonth'],
-                'suggestions': request.form.get('suggestions', '')
-            }
-        except (ValueError, KeyError) as e:
-            return jsonify({"success": False, "error": f"Invalid input data: {str(e)}"}), 400
+        # Get form data
+        client_data = {
+            'companyName': request.form['companyName'],
+            'numPosts': int(request.form['numPosts']),
+            'numReels': int(request.form['numReels']),
+            'platforms': json.loads(request.form['platforms']),
+            'targetMonth': request.form['targetMonth'],
+            'suggestions': request.form.get('suggestions', '')
+        }
         
-        # Handle image uploads with size validation
+        # Handle image uploads
         image_insights = None
         if 'suggestionImages' in request.files:
             files = request.files.getlist('suggestionImages')
             if files and any(file.filename != '' for file in files):
-                for file in files:
-                    if file.content_length > app.config['MAX_CONTENT_LENGTH']:
-                        return jsonify({"success": False, "error": "File too large"}), 413
                 image_insights = analyze_reference_images(files)
                 if image_insights:
                     client_data['imageInsights'] = image_insights
         
-        # Generate content calendar with error handling
-        try:
-            content_calendar = generate_content_calendar(
-                client_data['companyName'], 
-                '', 
-                '', 
-                '', 
-                client_data['targetMonth'],
-                client_data['platforms'],
-                client_data['numPosts'],
-                client_data['numReels']
-            )
-            if not content_calendar:
-                return jsonify({"success": False, "error": "Failed to generate content calendar"}), 500
+        # Generate content calendar with target month and platform selections
+        content_calendar = generate_content_calendar(
+            client_data['companyName'], 
+            '', 
+            '', 
+            '', 
+            client_data['targetMonth'],
+            client_data['platforms'],
+            client_data['numPosts'],
+            client_data['numReels']
+        )
+        if content_calendar:
             client_data['contentCalendar'] = content_calendar
-        except Exception as e:
-            app.logger.error(f"Error generating content calendar: {str(e)}")
-            return jsonify({"success": False, "error": "Failed to generate content calendar"}), 500
+        else:
+            return jsonify({"success": False, "error": "Failed to generate content calendar"})
         
-        # Save client data with error handling
-        try:
+        # Save client data
+        company_name = client_data['companyName']
+        if company_name not in data['clients']:
             data['clients'][company_name] = client_data
-            data['projects'][company_name] = {"calendar_entries": []}
             save_data(data)
-            app.logger.info(f"Successfully added new client: {company_name}")
+            
+            # Create project entries for the content calendar
+            data['projects'][company_name] = {
+                "calendar_entries": []
+            }
+            save_data(data)
+            
             return jsonify({"success": True})
-        except Exception as e:
-            app.logger.error(f"Error saving client data: {str(e)}")
-            return jsonify({"success": False, "error": "Failed to save client data"}), 500
+        else:
+            return jsonify({"success": False, "error": "Client already exists"})
             
     except Exception as e:
         app.logger.error(f"Error adding client: {str(e)}")
-        return jsonify({"success": False, "error": str(e)}), 500
+        return jsonify({"success": False, "error": str(e)})
 
 @app.route('/get_calendar_data/<project>')
 def get_calendar_data(project):
@@ -527,11 +484,11 @@ def test_gemini():
     
     try:
         # Test the text generation model
-        response = text_model.generate_content("Test message: Hello, this is a test of the Gemini API connection.")
+        response_text = generate_text("Test message: Hello, this is a test of the Gemini API connection.")
         return jsonify({
             "success": True,
             "message": "API connection successful!",
-            "test_response": response.text
+            "test_response": response_text
         })
     except Exception as e:
         app.logger.error(f"Gemini API test failed: {str(e)}")
@@ -552,20 +509,36 @@ def generate_preview_image(text_content, content_type, client_name, hashtags, ca
         - Include: Professional product image with visual elements
         """
         
+        app.logger.info(f"Generating image with prompt: {prompt}")
+        
         # Generate image using Gemini
-        response = image_model.generate_content(prompt)
+        response = client.models.generate_content(
+            model=IMAGE_MODEL_ID,
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                response_modalities=['Text', 'Image']
+            )
+        )
+        app.logger.info(f"Got response from Gemini: {response}")
         
         # Extract image from response
-        if hasattr(response, 'image') and response.image:
-            # Convert image data to bytes
-            img_data = response.image
-            img_bytes = bytes(img_data)
-            
-            # Create a BytesIO object
-            img_buffer = BytesIO(img_bytes)
-            
-            # Return the image buffer
-            return img_buffer
+        if hasattr(response, 'candidates') and response.candidates:
+            app.logger.info(f"Response has candidates")
+            for part in response.candidates[0].content.parts:
+                app.logger.info(f"Checking part: {part}")
+                if hasattr(part, 'inline_data') and part.inline_data is not None:
+                    app.logger.info("Found image data in response")
+                    # Convert image data to bytes
+                    img_data = part.inline_data.data
+                    img_bytes = bytes(img_data)
+                    
+                    # Create a BytesIO object
+                    img_buffer = BytesIO(img_bytes)
+                    
+                    # Return the image buffer
+                    return img_buffer
+        else:
+            app.logger.error("No candidates found in response")
                 
         app.logger.error("No image generated in response")
         return None
@@ -583,9 +556,11 @@ def preview_image(client_name, index):
         calendar_data = calendar_response.get_json()  # Convert response to JSON
         
         if not calendar_data or 'calendar_entries' not in calendar_data or index >= len(calendar_data['calendar_entries']):
+            app.logger.error("Post not found in calendar data")
             return "Post not found", 404
             
         post = calendar_data['calendar_entries'][index]
+        app.logger.info(f"Generating preview for post: {post}")
         
         # Generate preview image
         img_buffer = generate_preview_image(
@@ -597,13 +572,18 @@ def preview_image(client_name, index):
         )
         
         if img_buffer is None:
+            app.logger.error("Failed to generate image")
             return "Failed to generate image", 404
             
-        # Return the image
+        # Reset buffer position to beginning
+        img_buffer.seek(0)
+        
+        # Return the image with proper headers
         return send_file(
             img_buffer,
             mimetype='image/png',
-            as_attachment=False
+            as_attachment=False,
+            download_name='preview.png'
         )
         
     except Exception as e:
@@ -618,7 +598,7 @@ def delete_project():
     try:
         data = load_data()
         project_name = request.json.get('project_name')
-        
+    
         if not project_name:
             return jsonify({"success": False, "error": "Project name is required"}), 400
             
@@ -640,43 +620,7 @@ def delete_project():
         app.logger.error(f"Error deleting project: {str(e)}")
         return jsonify({"success": False, "error": str(e)}), 500
 
-# Error handlers
-@app.errorhandler(404)
-def not_found_error(error):
-    return render_template('404.html'), 404
-
-@app.errorhandler(500)
-def internal_error(error):
-    app.logger.error(f"Internal server error: {str(error)}")
-    return render_template('500.html'), 500
-
-@app.errorhandler(429)
-def ratelimit_handler(e):
-    return jsonify(error="Rate limit exceeded"), 429
-
-@app.errorhandler(Exception)
-def handle_exception(e):
-    # Handle non-HTTP exceptions
-    app.logger.error(f"Unhandled exception: {str(e)}")
-    return render_template('500.html'), 500
-
 if __name__ == '__main__':
     # Set debug mode based on environment
     debug_mode = os.getenv('FLASK_ENV') == 'development'
-    
-    # Production settings
-    if not debug_mode:
-        # Use gunicorn in production
-        app.run(
-            host='0.0.0.0',
-            port=int(os.getenv('PORT', 5000)),
-            debug=False,
-            use_reloader=False
-        )
-    else:
-        # Development settings
-        app.run(
-            host='0.0.0.0',
-            port=int(os.getenv('PORT', 5000)),
-            debug=True
-        )
+    app.run(host='0.0.0.0', port=int(os.getenv('PORT', 5000)), debug=debug_mode)

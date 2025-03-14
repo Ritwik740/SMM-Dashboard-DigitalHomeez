@@ -1,218 +1,153 @@
 {
     "clients": {
+        "Momos Palace": {
+            "companyName": "Momos Palace",
+            "numPosts": 1,
+            "numReels": 0,
+            "platforms": [
+                "instagram"
+            ],
+            "targetMonth": "2025-04",
+            "suggestions": "",
+            "contentCalendar": "[{\"date\": \"2025-04-15\", \"platform\": \"Instagram\", \"content_type\": \"Image\", \"topic\": \"Momos Palace Special\", \"description\": \"Delicious momos made with fresh ingredients, available now!\", \"hashtags\": \"#momos #momoslover #streetfood #foodie #delicious #special\", \"call_to_action\": \"Order now for a taste!\"}]"
+        },
+        "Momos King": {
+            "companyName": "Momos King",
+            "numPosts": 1,
+            "numReels": 0,
+            "platforms": [
+                "instagram"
+            ],
+            "targetMonth": "2025-04",
+            "suggestions": "",
+            "contentCalendar": "[{\"date\": \"2025-04-15\", \"platform\": \"Instagram\", \"content_type\": \"Image\", \"topic\": \"Momo Variety Showcase\", \"description\": \"Delicious momos of every kind! From classic to spicy, we have them all.\", \"hashtags\": \"#momos #momosking #dumplings #foodie #nepalifood #indianfood #streetfood #tasty\", \"call_to_action\": \"Order now and enjoy!\"}]"
+        },
+        "Dominoz Pizza": {
+            "companyName": "Dominoz Pizza",
+            "numPosts": 1,
+            "numReels": 0,
+            "platforms": [
+                "instagram"
+            ],
+            "targetMonth": "2025-04",
+            "suggestions": "",
+            "contentCalendar": "[{\"date\": \"2025-04-15\", \"platform\": \"Instagram\", \"content_type\": \"Image\", \"topic\": \"National Pizza Month Kickoff!\", \"description\": \"Celebrate National Pizza Month with Domino's! Best deals all month long.\", \"hashtags\": \"#NationalPizzaMonth #Dominos #PizzaDeals #April #PizzaLove\", \"call_to_action\": \"Order now and save!\"}]"
+        },
+        "Samosa Corner": {
+            "companyName": "Samosa Corner",
+            "numPosts": 1,
+            "numReels": 0,
+            "platforms": [
+                "instagram"
+            ],
+            "targetMonth": "2025-04",
+            "suggestions": "",
+            "contentCalendar": "[{\"date\": \"2025-04-15\", \"platform\": \"Instagram\", \"content_type\": \"Image\", \"topic\": \"Samosa Flavors\", \"description\": \"Explore our diverse samosa flavors! From classic potato to spicy chicken. What's your favorite?\", \"hashtags\": \"#samosa #indianfood #streetfood #snacks #foodie #samosalove\", \"call_to_action\": \"Order yours today! -> [link]\"}]"
+        },
         "Burger King": {
             "companyName": "Burger King",
             "numPosts": 2,
-            "numReels": 1,
-            "platforms": [
-                "facebook",
-                "instagram"
-            ],
-            "targetMonth": "2025-05",
-            "suggestions": "",
-            "contentCalendar": "[{\"date\": \"2025-05-05\", \"platform\": \"Facebook\", \"content_type\": \"Image\", \"topic\": \"Whopper Wednesday\", \"description\": \"Enjoy a flame-grilled Whopper for a special price every Wednesday! Don't miss out!\", \"hashtags\": \"#WhopperWednesday #BurgerKing #Deals #BurgerDeals\", \"call_to_action\": \"Visit us today!\"}, {\"date\": \"2025-05-15\", \"platform\": \"Instagram\", \"content_type\": \"Reel\", \"topic\": \"New Fiery Nuggets\", \"description\": \"Try our new Fiery Nuggets! The perfect blend of spice and crispy goodness.\", \"hashtags\": \"#FieryNuggets #BurgerKing #SpicyFood #FoodReel\", \"call_to_action\": \"Order now online!\"}, {\"date\": \"2025-05-25\", \"platform\": \"Instagram\", \"content_type\": \"Carousel\", \"topic\": \"Summer Value Menu\", \"description\": \"Cool down with our Summer Value Menu! Delicious treats at affordable prices.\", \"hashtags\": \"#SummerMenu #BurgerKing #ValueMenu #SummerDeals\", \"call_to_action\": \"Check it out in store!\"}]"
-        },
-        "Burger Singh": {
-            "companyName": "Burger Singh",
-            "numPosts": 3,
-            "numReels": 2,
-            "platforms": [
-                "instagram"
-            ],
-            "targetMonth": "2025-04",
-            "suggestions": "",
-            "contentCalendar": "[{\"date\": \"2025-04-03\", \"platform\": \"Instagram\", \"content_type\": \"Image\", \"topic\": \"Burger Singh's Spiciest Burger Challenge\", \"description\": \"Dare to try our fiery burger? Tag a friend who can handle the heat!\", \"hashtags\": \"#BurgerSingh #SpicyBurger #Challenge #IndianBurger #FoodChallenge\", \"call_to_action\": \"Tag a friend to challenge!\"}, {\"date\": \"2025-04-10\", \"platform\": \"Instagram\", \"content_type\": \"Reel\", \"topic\": \"Behind the Scenes: Burger Creation\", \"description\": \"Watch how we craft the perfect Burger Singh burger, fresh and delicious!\", \"hashtags\": \"#BurgerSingh #MakingOf #Foodie #IndianBurger #BehindTheScenes\", \"call_to_action\": \"Watch the full process!\"}, {\"date\": \"2025-04-17\", \"platform\": \"Instagram\", \"content_type\": \"Carousel\", \"topic\": \"Burger Singh's Value Meal Combos\", \"description\": \"Discover our amazing value meal combos. The perfect meal at affordable prices!\", \"hashtags\": \"#BurgerSingh #ValueMeal #ComboDeals #IndianBurger #AffordableFood\", \"call_to_action\": \"Order now & Save money!\"}, {\"date\": \"2025-04-24\", \"platform\": \"Instagram\", \"content_type\": \"Image\", \"topic\": \"New Burger Alert: The Tandoori Twist!\", \"description\": \"Introducing our new Tandoori Twist burger! A flavorful explosion you won't want to miss.\", \"hashtags\": \"#BurgerSingh #NewBurger #TandooriTwist #IndianBurger #FoodInnovation\", \"call_to_action\": \"Try the new Tandoori burger!\"}, {\"date\": \"2025-04-29\", \"platform\": \"Instagram\", \"content_type\": \"Reel\", \"topic\": \"Customer Testimonials: Why Burger Singh is the Best\", \"description\": \"Hear what our customers are saying about Burger Singh. The best burgers in town!\", \"hashtags\": \"#BurgerSingh #CustomerReview #BestBurger #IndianBurger #HappyCustomers\", \"call_to_action\": \"See why our customers love us!\"}]"
-        },
-        "Dominoz Pizza Lucknow": {
-            "companyName": "Dominoz Pizza Lucknow",
-            "numPosts": 1,
             "numReels": 0,
             "platforms": [
                 "instagram"
             ],
             "targetMonth": "2025-04",
             "suggestions": "",
-            "contentCalendar": "[{\"date\": \"2025-04-15\", \"platform\": \"Instagram\", \"content_type\": \"Image\", \"topic\": \"New Pizza Launch\", \"description\": \"Introducing our new tandoori pizza with authentic Lucknowi flavors! Try it now!\", \"hashtags\": \"#DominozLucknow #NewPizza #LucknowiFlavor #TandooriPizza #PizzaLove\", \"call_to_action\": \"Order online today!\"}]"
-        },
-        "TVS Motors": {
-            "companyName": "TVS Motors",
-            "numPosts": 1,
-            "numReels": 0,
-            "platforms": [
-                "instagram"
-            ],
-            "targetMonth": "2025-04",
-            "suggestions": "",
-            "contentCalendar": "[{\"date\": \"2025-04-15\", \"platform\": \"Instagram\", \"content_type\": \"Image\", \"topic\": \"TVS iQube Electric Scooter - Sustainable Commuting\", \"description\": \"Showcasing the TVS iQube, highlighting its eco-friendly features and benefits for daily commutes.\", \"hashtags\": \"#TVSiQube #ElectricScooter #SustainableMobility #GoGreen #ElectricVehicles\", \"call_to_action\": \"Book a test ride today!\"}]"
-        },
-        "City Mall": {
-            "companyName": "City Mall",
-            "numPosts": 1,
-            "numReels": 0,
-            "platforms": [
-                "instagram"
-            ],
-            "targetMonth": "2025-04",
-            "suggestions": "",
-            "contentCalendar": "[{\"date\": \"2025-04-15\", \"platform\": \"Instagram\", \"content_type\": \"Image\", \"topic\": \"Spring Fashion Trends\", \"description\": \"Discover the latest spring fashion trends available at City Mall!\", \"hashtags\": \"#SpringFashion #CityMall #FashionTrends #Shopping\", \"call_to_action\": \"Shop now for new styles!\"}]"
-        },
-        "Burger Nation": {
-            "companyName": "Burger Nation",
-            "numPosts": 1,
-            "numReels": 0,
-            "platforms": [
-                "instagram"
-            ],
-            "targetMonth": "2025-04",
-            "suggestions": "",
-            "contentCalendar": "[{\"date\": \"2025-04-15\", \"platform\": \"Instagram\", \"content_type\": \"Image\", \"topic\": \"Burger of the Month\", \"description\": \"Showcasing April's limited-time burger: The Spicy Inferno. Flavor that will ignite your taste buds!\", \"hashtags\": \"#BurgerOfTheMonth #SpicyBurger #BurgerNation #LimitedTime #Foodie #InstaFood\", \"call_to_action\": \"Try it today! Tag us!\"}]"
+            "contentCalendar": "[{\"date\": \"2025-04-15\", \"platform\": \"Instagram\", \"content_type\": \"Image\", \"topic\": \"New Spicy Burger\", \"description\": \"Introducing the fiery new Spicy Burger! Taste the heat!\", \"hashtags\": \"#SpicyBurger #BurgerKing #NewMenu #FireUp\", \"call_to_action\": \"Try it today!\"}, {\"date\": \"2025-04-28\", \"platform\": \"Instagram\", \"content_type\": \"Carousel\", \"topic\": \"Burger King App Deals\", \"description\": \"Exclusive deals on the Burger King app! Download now and save!\", \"hashtags\": \"#BurgerKingApp #Deals #Savings #FoodDeals\", \"call_to_action\": \"Download the app!\"}]"
         }
     },
     "projects": {
+        "Momos Palace": {
+            "calendar_entries": [
+                {
+                    "date": "2025-04-15",
+                    "day": "Tuesday",
+                    "content_type": "Image",
+                    "channel": "Instagram",
+                    "status": "pending",
+                    "text_content": "Momos Palace Special\nDelicious momos made with fresh ingredients, available now!",
+                    "approval": "pending",
+                    "hashtags": "#momos #momoslover #streetfood #foodie #delicious #special",
+                    "call_to_action": "Order now for a taste!",
+                    "references": "Hashtags: #momos #momoslover #streetfood #foodie #delicious #special\nCall to Action: Order now for a taste!"
+                }
+            ]
+        },
+        "Momos King": {
+            "calendar_entries": [
+                {
+                    "date": "2025-04-15",
+                    "day": "Tuesday",
+                    "content_type": "Image",
+                    "channel": "Instagram",
+                    "status": "pending",
+                    "text_content": "Momo Variety Showcase\nDelicious momos of every kind! From classic to spicy, we have them all.",
+                    "approval": "pending",
+                    "hashtags": "#momos #momosking #dumplings #foodie #nepalifood #indianfood #streetfood #tasty",
+                    "call_to_action": "Order now and enjoy!",
+                    "references": "Hashtags: #momos #momosking #dumplings #foodie #nepalifood #indianfood #streetfood #tasty\nCall to Action: Order now and enjoy!"
+                }
+            ]
+        },
+        "Dominoz Pizza": {
+            "calendar_entries": [
+                {
+                    "date": "2025-04-15",
+                    "day": "Tuesday",
+                    "content_type": "Image",
+                    "channel": "Instagram",
+                    "status": "pending",
+                    "text_content": "National Pizza Month Kickoff!\nCelebrate National Pizza Month with Domino's! Best deals all month long.",
+                    "approval": "pending",
+                    "hashtags": "#NationalPizzaMonth #Dominos #PizzaDeals #April #PizzaLove",
+                    "call_to_action": "Order now and save!",
+                    "references": "Hashtags: #NationalPizzaMonth #Dominos #PizzaDeals #April #PizzaLove\nCall to Action: Order now and save!"
+                }
+            ]
+        },
+        "Samosa Corner": {
+            "calendar_entries": [
+                {
+                    "date": "2025-04-15",
+                    "day": "Tuesday",
+                    "content_type": "Image",
+                    "channel": "Instagram",
+                    "status": "pending",
+                    "text_content": "Samosa Flavors\nExplore our diverse samosa flavors! From classic potato to spicy chicken. What's your favorite?",
+                    "approval": "pending",
+                    "hashtags": "#samosa #indianfood #streetfood #snacks #foodie #samosalove",
+                    "call_to_action": "Order yours today! -> [link]",
+                    "references": "Hashtags: #samosa #indianfood #streetfood #snacks #foodie #samosalove\nCall to Action: Order yours today! -> [link]"
+                }
+            ]
+        },
         "Burger King": {
             "calendar_entries": [
                 {
-                    "date": "2025-05-05",
+                    "date": "2025-04-15",
+                    "day": "Tuesday",
+                    "content_type": "Image",
+                    "channel": "Instagram",
+                    "status": "pending",
+                    "text_content": "New Spicy Burger\nIntroducing the fiery new Spicy Burger! Taste the heat!",
+                    "approval": "pending",
+                    "hashtags": "#SpicyBurger #BurgerKing #NewMenu #FireUp",
+                    "call_to_action": "Try it today!",
+                    "references": "Hashtags: #SpicyBurger #BurgerKing #NewMenu #FireUp\nCall to Action: Try it today!"
+                },
+                {
+                    "date": "2025-04-28",
                     "day": "Monday",
-                    "content_type": "Image",
-                    "channel": "Facebook",
-                    "status": "pending",
-                    "text_content": "Whopper Wednesday\nEnjoy a flame-grilled Whopper for a special price every Wednesday! Don't miss out!",
-                    "approval": "pending",
-                    "hashtags": "#WhopperWednesday #BurgerKing #Deals #BurgerDeals",
-                    "call_to_action": "Visit us today!",
-                    "references": "Hashtags: #WhopperWednesday #BurgerKing #Deals #BurgerDeals\nCall to Action: Visit us today!"
-                },
-                {
-                    "date": "2025-05-15",
-                    "day": "Thursday",
-                    "content_type": "Reel",
-                    "channel": "Instagram",
-                    "status": "pending",
-                    "text_content": "New Fiery Nuggets\nTry our new Fiery Nuggets! The perfect blend of spice and crispy goodness.",
-                    "approval": "pending",
-                    "hashtags": "#FieryNuggets #BurgerKing #SpicyFood #FoodReel",
-                    "call_to_action": "Order now online!",
-                    "references": "Hashtags: #FieryNuggets #BurgerKing #SpicyFood #FoodReel\nCall to Action: Order now online!"
-                },
-                {
-                    "date": "2025-05-25",
-                    "day": "Sunday",
                     "content_type": "Carousel",
                     "channel": "Instagram",
                     "status": "pending",
-                    "text_content": "Summer Value Menu\nCool down with our Summer Value Menu! Delicious treats at affordable prices.",
+                    "text_content": "Burger King App Deals\nExclusive deals on the Burger King app! Download now and save!",
                     "approval": "pending",
-                    "hashtags": "#SummerMenu #BurgerKing #ValueMenu #SummerDeals",
-                    "call_to_action": "Check it out in store!",
-                    "references": "Hashtags: #SummerMenu #BurgerKing #ValueMenu #SummerDeals\nCall to Action: Check it out in store!"
+                    "hashtags": "#BurgerKingApp #Deals #Savings #FoodDeals",
+                    "call_to_action": "Download the app!",
+                    "references": "Hashtags: #BurgerKingApp #Deals #Savings #FoodDeals\nCall to Action: Download the app!"
                 }
             ]
-        },
-        "Burger Singh": {
-            "calendar_entries": [
-                {
-                    "date": "2025-04-03",
-                    "day": "Thursday",
-                    "content_type": "Image",
-                    "channel": "Instagram",
-                    "status": "pending",
-                    "text_content": "Burger Singh's Spiciest Burger Challenge\nDare to try our fiery burger? Tag a friend who can handle the heat!",
-                    "approval": "pending",
-                    "references": "Hashtags: #BurgerSingh #SpicyBurger #Challenge #IndianBurger #FoodChallenge\nCall to Action: Tag a friend to challenge!"
-                },
-                {
-                    "date": "2025-04-10",
-                    "day": "Thursday",
-                    "content_type": "Reel",
-                    "channel": "Instagram",
-                    "status": "pending",
-                    "text_content": "Behind the Scenes: Burger Creation\nWatch how we craft the perfect Burger Singh burger, fresh and delicious!",
-                    "approval": "pending",
-                    "references": "Hashtags: #BurgerSingh #MakingOf #Foodie #IndianBurger #BehindTheScenes\nCall to Action: Watch the full process!"
-                },
-                {
-                    "date": "2025-04-17",
-                    "day": "Thursday",
-                    "content_type": "Carousel",
-                    "channel": "Instagram",
-                    "status": "pending",
-                    "text_content": "Burger Singh's Value Meal Combos\nDiscover our amazing value meal combos. The perfect meal at affordable prices!",
-                    "approval": "pending",
-                    "references": "Hashtags: #BurgerSingh #ValueMeal #ComboDeals #IndianBurger #AffordableFood\nCall to Action: Order now & Save money!"
-                },
-                {
-                    "date": "2025-04-24",
-                    "day": "Thursday",
-                    "content_type": "Image",
-                    "channel": "Instagram",
-                    "status": "pending",
-                    "text_content": "New Burger Alert: The Tandoori Twist!\nIntroducing our new Tandoori Twist burger! A flavorful explosion you won't want to miss.",
-                    "approval": "pending",
-                    "references": "Hashtags: #BurgerSingh #NewBurger #TandooriTwist #IndianBurger #FoodInnovation\nCall to Action: Try the new Tandoori burger!"
-                },
-                {
-                    "date": "2025-04-29",
-                    "day": "Tuesday",
-                    "content_type": "Reel",
-                    "channel": "Instagram",
-                    "status": "pending",
-                    "text_content": "Customer Testimonials: Why Burger Singh is the Best\nHear what our customers are saying about Burger Singh. The best burgers in town!",
-                    "approval": "pending",
-                    "references": "Hashtags: #BurgerSingh #CustomerReview #BestBurger #IndianBurger #HappyCustomers\nCall to Action: See why our customers love us!"
-                }
-            ]
-        },
-        "Dominoz Pizza Lucknow": {
-            "calendar_entries": [
-                {
-                    "date": "2025-04-15",
-                    "day": "Tuesday",
-                    "content_type": "Image",
-                    "channel": "Instagram",
-                    "status": "pending",
-                    "text_content": "New Pizza Launch\nIntroducing our new tandoori pizza with authentic Lucknowi flavors! Try it now!",
-                    "approval": "pending",
-                    "hashtags": "#DominozLucknow #NewPizza #LucknowiFlavor #TandooriPizza #PizzaLove",
-                    "call_to_action": "Order online today!",
-                    "references": "Hashtags: #DominozLucknow #NewPizza #LucknowiFlavor #TandooriPizza #PizzaLove\nCall to Action: Order online today!"
-                }
-            ]
-        },
-        "TVS Motors": {
-            "calendar_entries": [
-                {
-                    "date": "2025-04-15",
-                    "day": "Tuesday",
-                    "content_type": "Image",
-                    "channel": "Instagram",
-                    "status": "pending",
-                    "text_content": "TVS iQube Electric Scooter - Sustainable Commuting\nShowcasing the TVS iQube, highlighting its eco-friendly features and benefits for daily commutes.",
-                    "approval": "pending",
-                    "hashtags": "#TVSiQube #ElectricScooter #SustainableMobility #GoGreen #ElectricVehicles",
-                    "call_to_action": "Book a test ride today!",
-                    "references": "Hashtags: #TVSiQube #ElectricScooter #SustainableMobility #GoGreen #ElectricVehicles\nCall to Action: Book a test ride today!"
-                }
-            ]
-        },
-        "City Mall": {
-            "calendar_entries": [
-                {
-                    "date": "2025-04-15",
-                    "day": "Tuesday",
-                    "content_type": "Image",
-                    "channel": "Instagram",
-                    "status": "pending",
-                    "text_content": "Spring Fashion Trends\nDiscover the latest spring fashion trends available at City Mall!",
-                    "approval": "pending",
-                    "hashtags": "#SpringFashion #CityMall #FashionTrends #Shopping",
-                    "call_to_action": "Shop now for new styles!",
-                    "references": "Hashtags: #SpringFashion #CityMall #FashionTrends #Shopping\nCall to Action: Shop now for new styles!"
-                }
-            ]
-        },
-        "Burger Nation": {
-            "calendar_entries": []
         }
     }
 }

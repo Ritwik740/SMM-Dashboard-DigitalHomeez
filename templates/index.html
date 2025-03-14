@@ -323,11 +323,20 @@
                                         <td>${entry.hashtags || ''}</td>
                                         <td>${entry.call_to_action || ''}</td>
                                         <td>
-                                            <img src="/preview/${encodeURIComponent(currentProject)}/${index}" 
-                                                 alt="Preview" 
-                                                 class="img-thumbnail" 
-                                                 style="max-width: 150px; cursor: pointer;"
-                                                 onclick="showPreview(this.src)">
+                                            <div class="preview-container" style="width: 150px; height: 150px; position: relative;">
+                                                <img src="/preview/${encodeURIComponent(currentProject)}/${index}" 
+                                                     alt="Preview" 
+                                                     class="img-thumbnail" 
+                                                     style="max-width: 100%; max-height: 100%; cursor: pointer;"
+                                                     onerror="console.error('Image load error:', this.src); this.onerror=null; this.src='/static/images/placeholder.png';"
+                                                     onload="console.log('Image loaded successfully:', this.src);"
+                                                     onclick="showPreview(this.src)">
+                                                <div class="preview-loading" style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                                                    <div class="spinner-border text-primary" role="status">
+                                                        <span class="visually-hidden">Loading...</span>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </td>
                                         <td>${entry.approval}</td>
                                         <td>${entry.references}</td>
@@ -346,6 +355,12 @@
         }
 
         function showPreview(src) {
+            console.log('Opening preview for:', src);
+            // Show loading state
+            const previewContainer = event.target.parentElement;
+            const loadingDiv = previewContainer.querySelector('.preview-loading');
+            loadingDiv.style.display = 'block';
+            
             // Create a modal for the preview
             const modal = document.createElement('div');
             modal.className = 'modal fade';
@@ -357,11 +372,34 @@
                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                         </div>
                         <div class="modal-body text-center">
-                            <img src="${src}" class="img-fluid" alt="Preview">
+                            <div class="preview-loading">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                            <img src="${src}" 
+                                 class="img-fluid" 
+                                 alt="Preview" 
+                                 style="display: none;"
+                                 onerror="console.error('Modal image load error:', this.src); this.onerror=null; this.src='/static/images/placeholder.png';"
+                                 onload="console.log('Modal image loaded successfully:', this.src);">
                         </div>
                     </div>
                 </div>
             `;
+            
+            const modalImg = modal.querySelector('img');
+            modalImg.onload = function() {
+                modal.querySelector('.preview-loading').style.display = 'none';
+                modalImg.style.display = 'block';
+            };
+            
+            modalImg.onerror = function() {
+                modal.querySelector('.preview-loading').style.display = 'none';
+                modalImg.src = '/static/images/placeholder.png';
+                modalImg.style.display = 'block';
+            };
+            
             document.body.appendChild(modal);
             const modalInstance = new bootstrap.Modal(modal);
             modalInstance.show();
