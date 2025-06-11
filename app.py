@@ -5,7 +5,8 @@ import calendar
 from dateutil.relativedelta import relativedelta
 import os
 import secrets
-from google import genai
+# from google import genai
+import google.generativeai as genai
 from PIL import Image, ImageDraw, ImageFont
 import io
 from werkzeug.utils import secure_filename
