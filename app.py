@@ -13,8 +13,8 @@ from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
 import textwrap
 from io import BytesIO
-from google.genai import types
-
+# from google.genai import types
+from google.generativeai import types
 # Load environment variables
 load_dotenv()
 
